@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Frontend;
 
 use App\Http\Controllers\Controller;
-use App\Models\VisitorInterestEvent;
 use App\Models\VisitorSession;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -70,36 +69,5 @@ class VisitorTrackingController extends Controller
             'success' => true,
             'tracked_at' => $now->toIso8601String(),
         ]);
-    }
-
-    public function trackInterest(Request $request): JsonResponse
-    {
-        $validated = $request->validate([
-            'visitor_token' => ['required', 'string', 'min:12', 'max:80'],
-            'event_type' => ['required', 'string', 'in:product_view,add_to_cart'],
-            'product_id' => ['nullable', 'integer', 'min:1'],
-            'product_slug' => ['nullable', 'string', 'max:190'],
-            'product_name' => ['nullable', 'string', 'max:255'],
-            'qty' => ['nullable', 'integer', 'min:1', 'max:99'],
-            'page_type' => ['nullable', 'string', 'max:80'],
-            'source_route' => ['nullable', 'string', 'max:190'],
-            'meta' => ['nullable', 'array'],
-        ]);
-
-        VisitorInterestEvent::query()->create([
-            'visitor_token' => $validated['visitor_token'],
-            'event_type' => $validated['event_type'],
-            'product_id' => $validated['product_id'] ?? null,
-            'product_slug' => $validated['product_slug'] ?? null,
-            'product_name' => $validated['product_name'] ?? null,
-            'qty' => (int) ($validated['qty'] ?? 1),
-            'page_type' => $validated['page_type'] ?? null,
-            'source_route' => $validated['source_route'] ?? null,
-            'ip_address' => $request->ip(),
-            'user_agent' => substr((string) $request->userAgent(), 0, 65535),
-            'meta_json' => $validated['meta'] ?? null,
-        ]);
-
-        return response()->json(['success' => true]);
     }
 }

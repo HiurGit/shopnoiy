@@ -8,7 +8,6 @@ use App\Support\FrontendProductSearch;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Livewire\Component;
 
@@ -262,33 +261,7 @@ class ProductInfiniteList extends Component
 
     private function applyCategorySearch(Builder $query): void
     {
-        $rawQuery = trim($this->queryText);
-
-        if ($rawQuery === '') {
-            return;
-        }
-
-        $tokens = array_values(array_filter(
-            preg_split('/\s+/u', $rawQuery) ?: [],
-            fn (string $token) => mb_strlen(trim($token)) > 1
-        ));
-
-        if ($tokens === []) {
-            FrontendProductSearch::applyToQuery($query, $this->queryText);
-
-            return;
-        }
-
-        $driver = DB::getDriverName();
-
-        if ($driver === 'mysql' && Schema::hasColumn('products', 'name')) {
-            foreach ($tokens as $token) {
-                $query->whereRaw(
-                    'LOWER(CONVERT(name USING utf8mb4)) COLLATE utf8mb4_unicode_ci LIKE ?',
-                    ['%' . $token . '%']
-                );
-            }
-
+        if (trim($this->queryText) === '') {
             return;
         }
 

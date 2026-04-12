@@ -594,14 +594,6 @@
 
     syncQuantity(selectedQuantityInput?.value || minQuantity);
     syncSelectionSummary();
-    window.ShopNoiyVisitorTracking?.trackInterest({
-      event_type: 'product_view',
-      product_id: Number(productPayload.product_id || productPayload.id || 0) || null,
-      product_slug: productPayload.slug || '',
-      product_name: productPayload.name || '',
-      qty: 1,
-    });
-
     ctaButtons.forEach((button) => {
       button.addEventListener('click', (event) => {
         if (button.getAttribute('aria-disabled') === 'true') {
@@ -639,14 +631,6 @@
             product_slug: productPayload.slug || '',
           }
         });
-        window.ShopNoiyVisitorTracking?.trackInterest({
-          event_type: 'add_to_cart',
-          product_id: Number(productPayload.product_id || productPayload.id || 0) || null,
-          product_slug: productPayload.slug || '',
-          product_name: productPayload.name || '',
-          qty: Number(selectedQuantityInput?.value || 1),
-        });
-
         const label = button.querySelector('span');
         if (label) {
           window.clearTimeout(addCartFeedbackTimer);
@@ -662,5 +646,4 @@
   })();
 </script>
 @endpush
-
 

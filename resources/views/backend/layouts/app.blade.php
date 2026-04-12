@@ -161,9 +161,6 @@
             @if ($canAccess('visitor_sessions'))
               <li class="nav-item"><a href="{{ route('backend.visitor-sessions') }}" class="nav-link {{ request()->routeIs('backend.visitor-sessions*') ? 'active' : '' }}"><i class="nav-icon bi bi-broadcast"></i><p>Khách đang online</p></a></li>
             @endif
-            @if ($canAccess('visitor_interest_events'))
-              <li class="nav-item"><a href="{{ route('backend.visitor-interest-events') }}" class="nav-link {{ request()->routeIs('backend.visitor-interest-events*') ? 'active' : '' }}"><i class="nav-icon bi bi-graph-up-arrow"></i><p>Sản phẩm quan tâm</p></a></li>
-            @endif
             @if ($isAdmin)
               <li class="nav-item"><a href="{{ route('backend.roles') }}" class="nav-link {{ request()->routeIs('backend.roles*') ? 'active' : '' }}"><i class="nav-icon bi bi-shield-lock"></i><p>Quản lý role</p></a></li>
             @endif

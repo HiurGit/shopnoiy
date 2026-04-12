@@ -64,7 +64,7 @@
     <section class="search-results-head">
       <div>
         <p class="search-results-label">Kết quả tìm kiếm</p>
-        <h2>{{ number_format($resultCount, 0, ',', '.') }} sản phẩm cho "{{ $queryText }}"</h2>
+       
       </div>
     </section>
 

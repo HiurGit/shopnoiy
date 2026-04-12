@@ -1353,7 +1353,6 @@
       const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
       const visitorStorageKey = 'shopnoiy:visitor:v1';
       const visitorTrackingRoute = @json(route('frontend.visitor-tracking'));
-      const visitorInterestRoute = @json(route('frontend.visitor-interest'));
       const visitorBaseContext = {
         route_name: @json(request()->route()?->getName()),
         page_type: @json($visitorPageType),
@@ -1463,26 +1462,6 @@
       window.ShopNoiyVisitorTracking = {
         update(extra = {}) {
           scheduleVisitorTracking(extra);
-        },
-        trackInterest(payload = {}) {
-          const body = {
-            visitor_token: readVisitorToken(),
-            page_type: visitorBaseContext.page_type,
-            source_route: visitorBaseContext.route_name,
-            ...payload,
-          };
-
-          window.fetch(visitorInterestRoute, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-              'X-CSRF-TOKEN': csrfToken,
-              'X-Requested-With': 'XMLHttpRequest'
-            },
-            credentials: 'same-origin',
-            body: JSON.stringify(body)
-          }).catch(() => {});
         }
       };
 

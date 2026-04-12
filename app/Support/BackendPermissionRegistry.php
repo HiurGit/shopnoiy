@@ -120,11 +120,6 @@ class BackendPermissionRegistry
                 'route' => 'backend.visitor-sessions',
                 'prefixes' => ['backend.visitor-sessions'],
             ],
-            'visitor_interest_events' => [
-                'label' => 'San pham duoc quan tam',
-                'route' => 'backend.visitor-interest-events',
-                'prefixes' => ['backend.visitor-interest-events'],
-            ],
         ];
     }
 

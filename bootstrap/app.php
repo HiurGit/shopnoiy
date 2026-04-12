@@ -14,7 +14,6 @@ $app = Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: [
             'thanh-toan/vietqr/sepay-webhook',
             'theo-doi-khach',
-            'theo-doi-san-pham-quan-tam',
         ]);
 
         $middleware->alias([
