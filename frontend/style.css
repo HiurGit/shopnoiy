@@ -243,18 +243,29 @@ body.promo-hidden .topbar {
 }
 
 .logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
   font-size: 22px;
   line-height: 1;
   font-weight: 800;
   letter-spacing: -0.8px;
   color: var(--blue);
-  
   text-decoration: none;
   flex-shrink: 0;
+  min-width: 0;
 }
 
 .logo span {
   color: var(--yellow);
+}
+
+.logo img {
+  display: block;
+  width: auto;
+  height: 42px;
+  max-width: min(220px, 44vw);
+  object-fit: contain;
 }
 
 .actions {

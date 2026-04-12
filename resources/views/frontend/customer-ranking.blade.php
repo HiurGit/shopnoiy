@@ -369,7 +369,7 @@
 <main class="phone cat-phone customer-ranking-phone">
   <header class="cat-topbar">
     <div class="topbar-row">
-      <a href="{{ route('frontend.home') }}" class="logo">{{ $frontendLogoPrimary }}@if ($frontendLogoAccent) <span>{{ $frontendLogoAccent }}</span>@endif</a>
+      @include('frontend.partials.logo')
       <a href="{{ route('frontend.search') }}" class="search-form topbar-search search-entry-link" aria-label="Mở tìm kiếm">
         <i class="bi bi-search search-icon"></i>
         <span class="search-entry-text">Tìm sản phẩm...</span>
