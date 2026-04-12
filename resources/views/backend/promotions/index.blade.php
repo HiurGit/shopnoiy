@@ -1,0 +1,9 @@
+﻿@extends('backend.layouts.app')
+@section('title', 'Khuyến mãi')
+@section('content')
+<div class="app-content-header"><div class="container-fluid"><h1 class="mb-0">Khuyến mãi</h1></div></div>
+<div class="app-content"><div class="container-fluid">
+  @if (session('success'))<div class="alert alert-success">{{ session('success') }}</div>@endif
+  <div class="card"><div class="card-header d-flex justify-content-between align-items-center"><h3 class="card-title mb-0">Danh sách khuyến mãi</h3><a href="{{ route('backend.promotions.create') }}" class="btn btn-primary btn-sm ms-auto">Thêm mới</a></div><div class="card-body"><div class="table-responsive"><table class="table table-striped table-hover align-middle mb-0"><thead><tr><th>ID</th><th>Tên</th><th>Mã</th><th>Loại</th><th>Kênh</th><th>Giảm</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody>@forelse($promotions as $promotion)<tr><td>{{ $promotion->id }}</td><td>{{ $promotion->name }}</td><td>{{ $promotion->code }}</td><td>{{ $promotion->promotion_type }}</td><td>{{ $promotion->channel }}</td><td>{{ $promotion->discount_type }} / {{ $promotion->discount_value }}</td><td>{{ $promotion->status }}</td><td><a href="{{ route('backend.promotions.show', $promotion) }}" class="btn btn-info btn-sm text-white">Xem</a> <a href="{{ route('backend.promotions.edit', $promotion) }}" class="btn btn-outline-primary btn-sm">Sửa</a> <form action="{{ route('backend.promotions.destroy', $promotion) }}" method="POST" class="d-inline" onsubmit="return confirm('Xóa khuyến mãi này?')">@csrf @method('DELETE')<button type="submit" class="btn btn-outline-danger btn-sm">Xóa</button></form></td></tr>@empty<tr><td colspan="8" class="text-center">Chưa có dữ liệu.</td></tr>@endforelse</tbody></table></div><div class="mt-3">{{ $promotions->links() }}</div></div></div>
+</div></div>
+@endsection

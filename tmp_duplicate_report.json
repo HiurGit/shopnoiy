@@ -1,0 +1,118 @@
+{
+  "high_confidence_clusters": [
+    {
+      "product_ids": [
+        85,
+        95
+      ],
+      "products": [
+        {
+          "id": 85,
+          "name": "Quần Lót Lụa Bóng, Quần Lót Nữ Cao Cấp MS2282"
+        },
+        {
+          "id": 95,
+          "name": "Quần Lót Tàng Hình Air Gam Pastel 2282"
+        }
+      ]
+    },
+    {
+      "product_ids": [
+        94,
+        279
+      ],
+      "products": [
+        {
+          "id": 94,
+          "name": "Áo Lót Nữ, Áo Ngực Không Gọng Su Non Nguyên Khối Mút 3cm Nâng Ngực MS3255"
+        },
+        {
+          "id": 279,
+          "name": "Áo Ngực Không Gọng Su Non Đệm Vừa"
+        }
+      ]
+    }
+  ],
+  "review_pairs": [
+    {
+      "a_id": 35,
+      "a_name": "Quần Lót Ren Lọt Khe Dây Thời Trang MS2303",
+      "b_id": 186,
+      "b_name": "Quần Lót Lọt Khe Quyến Rũ MS570",
+      "score": 99.41,
+      "dhash": 6,
+      "ahash": 2,
+      "hist_cosine": 0.9953
+    },
+    {
+      "a_id": 35,
+      "a_name": "Quần Lót Ren Lọt Khe Dây Thời Trang MS2303",
+      "b_id": 155,
+      "b_name": "Quần Lót Ren Hoa Lọt Khe Gợi Cảm MS2263",
+      "score": 99.17,
+      "dhash": 6,
+      "ahash": 3,
+      "hist_cosine": 0.9992
+    },
+    {
+      "a_id": 140,
+      "a_name": "Quần Lót Lọt Khe Thêu Hoa Sau 2 Dây Hông Quyến Rũ",
+      "b_id": 186,
+      "b_name": "Quần Lót Lọt Khe Quyến Rũ MS570",
+      "score": 98.64,
+      "dhash": 6,
+      "ahash": 4,
+      "hist_cosine": 0.996
+    },
+    {
+      "a_id": 75,
+      "a_name": "Quần Lót Ren Lọt Khe Dây Chéo 2252",
+      "b_id": 178,
+      "b_name": "Quần Lót Ren Nữ Cạp Đính Nơ Sau Siêu Đẹp HH",
+      "score": 98.4,
+      "dhash": 7,
+      "ahash": 3,
+      "hist_cosine": 0.995
+    },
+    {
+      "a_id": 35,
+      "a_name": "Quần Lót Ren Lọt Khe Dây Thời Trang MS2303",
+      "b_id": 140,
+      "b_name": "Quần Lót Lọt Khe Thêu Hoa Sau 2 Dây Hông Quyến Rũ",
+      "score": 98.32,
+      "dhash": 8,
+      "ahash": 2,
+      "hist_cosine": 0.9981
+    },
+    {
+      "a_id": 155,
+      "a_name": "Quần Lót Ren Hoa Lọt Khe Gợi Cảm MS2263",
+      "b_id": 186,
+      "b_name": "Quần Lót Lọt Khe Quyến Rũ MS570",
+      "score": 97.83,
+      "dhash": 8,
+      "ahash": 3,
+      "hist_cosine": 0.9957
+    },
+    {
+      "a_id": 75,
+      "a_name": "Quần Lót Ren Lọt Khe Dây Chéo 2252",
+      "b_id": 186,
+      "b_name": "Quần Lót Lọt Khe Quyến Rũ MS570",
+      "score": 97.5,
+      "dhash": 6,
+      "ahash": 7,
+      "hist_cosine": 0.9974
+    },
+    {
+      "a_id": 35,
+      "a_name": "Quần Lót Ren Lọt Khe Dây Thời Trang MS2303",
+      "b_id": 75,
+      "b_name": "Quần Lót Ren Lọt Khe Dây Chéo 2252",
+      "score": 97.14,
+      "dhash": 8,
+      "ahash": 5,
+      "hist_cosine": 0.9986
+    }
+  ]
+}

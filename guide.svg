@@ -1,0 +1,28 @@
+<svg width="96" height="96" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="8" y="6" width="80" height="84" rx="20" fill="#FFFFFF"/>
+  <rect x="8" y="6" width="80" height="84" rx="20" stroke="#E6E1D8" stroke-width="2"/>
+  <path d="M8 24C8 13.5066 16.5066 5 27 5H69C79.4934 5 88 13.5066 88 24V28H8V24Z" fill="url(#paint0_linear_521_10)"/>
+  <rect x="8" y="26" width="80" height="2" fill="#CFC9C0"/>
+  <rect x="16" y="34" width="64" height="4" rx="2" fill="#BFBBC2"/>
+  <circle cx="18" cy="30" r="1.5" fill="#BFBBC2"/>
+  <circle cx="23" cy="30" r="1.5" fill="#BFBBC2"/>
+  <circle cx="28" cy="30" r="1.5" fill="#BFBBC2"/>
+  <circle cx="33" cy="30" r="1.5" fill="#BFBBC2"/>
+  <circle cx="38" cy="30" r="1.5" fill="#BFBBC2"/>
+  <circle cx="43" cy="30" r="1.5" fill="#BFBBC2"/>
+  <circle cx="48" cy="30" r="1.5" fill="#BFBBC2"/>
+  <circle cx="53" cy="30" r="1.5" fill="#BFBBC2"/>
+  <circle cx="58" cy="30" r="1.5" fill="#BFBBC2"/>
+  <circle cx="63" cy="30" r="1.5" fill="#BFBBC2"/>
+  <circle cx="68" cy="30" r="1.5" fill="#BFBBC2"/>
+  <circle cx="73" cy="30" r="1.5" fill="#BFBBC2"/>
+  <circle cx="78" cy="30" r="1.5" fill="#BFBBC2"/>
+  <rect x="16" y="48" width="64" height="3.5" rx="1.75" fill="#C8C3CA"/>
+  <rect x="16" y="63" width="64" height="3.5" rx="1.75" fill="#C8C3CA"/>
+  <defs>
+    <linearGradient id="paint0_linear_521_10" x1="48" y1="5" x2="48" y2="28" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFE48B"/>
+      <stop offset="1" stop-color="#FFCD2E"/>
+    </linearGradient>
+  </defs>
+</svg>

@@ -1,0 +1,6 @@
+﻿# Security for upload folder
+Options -Indexes
+
+<FilesMatch "\.(php|phtml|phar|cgi|pl|py|sh|bat|exe)$">
+    Require all denied
+</FilesMatch>

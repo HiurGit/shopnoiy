@@ -1,0 +1,14 @@
+﻿<div class="row g-3">
+<div class="col-md-4"><label class="form-label">Section</label><select name="section_id" class="form-select">@foreach($sections as $section)<option value="{{ $section->id }}" {{ (string) old('section_id', $homeItem->section_id ?? '') === (string) $section->id ? 'selected' : '' }}>{{ $section->title }}</option>@endforeach</select></div>
+<div class="col-md-4"><label class="form-label">Loại item</label><input type="text" name="item_type" class="form-control" value="{{ old('item_type', $homeItem->item_type ?? 'banner') }}"></div>
+<div class="col-md-4"><label class="form-label">Ref ID</label><input type="number" name="ref_id" class="form-control" value="{{ old('ref_id', $homeItem->ref_id ?? '') }}"></div>
+<div class="col-md-6"><label class="form-label">Tiêu đề</label><input type="text" name="title" class="form-control" value="{{ old('title', $homeItem->title ?? '') }}"></div>
+<div class="col-md-6"><label class="form-label">Subtitle</label><input type="text" name="subtitle" class="form-control" value="{{ old('subtitle', $homeItem->subtitle ?? '') }}"></div>
+<div class="col-md-6"><label class="form-label">Image URL</label><input type="text" name="image_url" class="form-control" value="{{ old('image_url', $homeItem->image_url ?? '') }}"></div>
+<div class="col-md-6"><label class="form-label">Target URL</label><input type="text" name="target_url" class="form-control" value="{{ old('target_url', $homeItem->target_url ?? '') }}"></div>
+<div class="col-md-4"><label class="form-label">Sort</label><input type="number" name="sort_order" class="form-control" value="{{ old('sort_order', $homeItem->sort_order ?? 0) }}"></div>
+<div class="col-md-4 d-flex align-items-end"><div class="form-check"><input class="form-check-input" type="checkbox" name="is_active" value="1" {{ old('is_active', $homeItem->is_active ?? true) ? 'checked' : '' }}><label class="form-check-label">Kích hoạt</label></div></div>
+<div class="col-md-6"><label class="form-label">Bắt đầu</label><input type="datetime-local" name="start_at" class="form-control" value="{{ old('start_at', isset($homeItem) && $homeItem->start_at ? \Carbon\Carbon::parse($homeItem->start_at)->format('Y-m-d\TH:i') : '') }}"></div>
+<div class="col-md-6"><label class="form-label">Kết thúc</label><input type="datetime-local" name="end_at" class="form-control" value="{{ old('end_at', isset($homeItem) && $homeItem->end_at ? \Carbon\Carbon::parse($homeItem->end_at)->format('Y-m-d\TH:i') : '') }}"></div>
+<div class="col-12"><label class="form-label">Meta JSON</label><textarea name="meta_json" class="form-control" rows="3">{{ old('meta_json', $homeItem->meta_json ?? '') }}</textarea></div>
+</div><div class="mt-3 d-flex gap-2"><button class="btn btn-primary" type="submit">{{ isset($homeItem) ? 'Cập nhật' : 'Tạo mới' }}</button><a href="{{ route('backend.home-management') }}" class="btn btn-secondary">Quay lại</a></div>

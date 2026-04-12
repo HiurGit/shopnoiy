@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+
+Disallow: /admin/
+Disallow: /thaodepzai/
+Disallow: /tim-kiem
+Disallow: /tim-kiem?
+Disallow: /tim-kiem-goi-y
+Disallow: /gio-hang
+Disallow: /thanh-toan
+Disallow: /dat-hang
+Disallow: /thanh-toan-vietqr/
+
+Sitemap: /sitemap.xml

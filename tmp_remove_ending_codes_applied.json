@@ -1,0 +1,422 @@
+[
+    {
+        "id": 3,
+        "old_name": "Áo Lót Úc Siêu Nâng Ngực K32",
+        "new_name": "Áo Lót Úc Siêu Nâng Ngực"
+    },
+    {
+        "id": 4,
+        "old_name": "Áo Dán Nâng Ngực Có Mút Dày 6cm, Áo Cài Trước Tạo Khe Siêu Nâng P41",
+        "new_name": "Áo Dán Nâng Ngực Có Mút Dày 6cm, Áo Cài Trước Tạo Khe Siêu Nâng"
+    },
+    {
+        "id": 5,
+        "old_name": "Hộp Dán Nhũ Hoa Silicon Siêu Mỏng 1401",
+        "new_name": "Hộp Dán Nhũ Hoa Silicon Siêu Mỏng"
+    },
+    {
+        "id": 7,
+        "old_name": "Áo Lót Ren Mềm Có Gọng Không Mút MS2004",
+        "new_name": "Áo Lót Ren Mềm Có Gọng Không Mút"
+    },
+    {
+        "id": 11,
+        "old_name": "Áo Lót Nữ Úc Su Mút Dày 4, 5cm Siêu Nâng Ngực Tạo Khe Chống Xổ Không Lộ Viền Q8002",
+        "new_name": "Áo Lót Nữ Úc Su Mút Dày 4, 5cm Siêu Nâng Ngực Tạo Khe Chống Xổ Không Lộ Viền"
+    },
+    {
+        "id": 13,
+        "old_name": "Áo Bra Tập Gym Yoga Aerobic Kèm Mút M85",
+        "new_name": "Áo Bra Tập Gym Yoga Aerobic Kèm Mút"
+    },
+    {
+        "id": 19,
+        "old_name": "Áo Lót Bra Tăm Dáng Dài Mút Liền 1880",
+        "new_name": "Áo Lót Bra Tăm Dáng Dài Mút Liền"
+    },
+    {
+        "id": 23,
+        "old_name": "Quần Lót Ren Xuyên Thấu Phối Ren Đính Nơ Sau 5006",
+        "new_name": "Quần Lót Ren Xuyên Thấu Phối Ren Đính Nơ Sau"
+    },
+    {
+        "id": 28,
+        "old_name": "Quần Gen Bụng Nâng Mông Siết Eo Thon K10",
+        "new_name": "Quần Gen Bụng Nâng Mông Siết Eo Thon"
+    },
+    {
+        "id": 29,
+        "old_name": "Quần Lót Úc Thông Hơi Form To 55 - 65Kg 1524",
+        "new_name": "Quần Lót Úc Thông Hơi Form To 55 - 65Kg"
+    },
+    {
+        "id": 30,
+        "old_name": "Quần Lót Su Tăm Mềmềm Mát Dây Chữ Sport 9026",
+        "new_name": "Quần Lót Su Tăm Mềmềm Mát Dây Chữ Sport"
+    },
+    {
+        "id": 31,
+        "old_name": "Áo Lót Úc Su Non Thông Hơi Mút Mỏng Định Hình Chống Xổ 2027",
+        "new_name": "Áo Lót Úc Su Non Thông Hơi Mút Mỏng Định Hình Chống Xổ"
+    },
+    {
+        "id": 32,
+        "old_name": "Áo Bra Ren Cao Cấp Hoa Hồng 3D Siêu Xinh MS3654",
+        "new_name": "Áo Bra Ren Cao Cấp Hoa Hồng 3D Siêu Xinh"
+    },
+    {
+        "id": 33,
+        "old_name": "Đai Nịt Bụng Tan Mỡ Loại Đẹp MS331",
+        "new_name": "Đai Nịt Bụng Tan Mỡ Loại Đẹp"
+    },
+    {
+        "id": 35,
+        "old_name": "Quần Lót Ren Lọt Khe Dây Thời Trang MS2303",
+        "new_name": "Quần Lót Ren Lọt Khe Dây Thời Trang"
+    },
+    {
+        "id": 36,
+        "old_name": "Quần Lót Ren Xuyên Thấu Gợi Cảm MS028",
+        "new_name": "Quần Lót Ren Xuyên Thấu Gợi Cảm"
+    },
+    {
+        "id": 44,
+        "old_name": "Áo Bra Dây Đan Chéo Trẻ Trung Sẵn Mút MS4836",
+        "new_name": "Áo Bra Dây Đan Chéo Trẻ Trung Sẵn Mút"
+    },
+    {
+        "id": 45,
+        "old_name": "Quần Lót Su Ren Mềm Mại Siêu Đẹp M77",
+        "new_name": "Quần Lót Su Ren Mềm Mại Siêu Đẹp"
+    },
+    {
+        "id": 46,
+        "old_name": "Áo Lót Úc Su Không Gọng Mút 3CM Mẫu Mới Ôm Form Mềm Mại MS3498",
+        "new_name": "Áo Lót Úc Su Không Gọng Mút 3CM Mẫu Mới Ôm Form Mềm Mại"
+    },
+    {
+        "id": 48,
+        "old_name": "Quần Lót Nữ Kháng Khuẩn Siêu Tàng Hình 999",
+        "new_name": "Quần Lót Nữ Kháng Khuẩn Siêu Tàng Hình"
+    },
+    {
+        "id": 53,
+        "old_name": "Áo Lót Úc Su Không Gọng Bản To Nâng Ngực, Dây Thời Trang Mẫu Mới 822",
+        "new_name": "Áo Lót Úc Su Không Gọng Bản To Nâng Ngực, Dây Thời Trang Mẫu Mới"
+    },
+    {
+        "id": 57,
+        "old_name": "Áo Bra Tăm Sẵn Mút Cúc Xinh Xắn MS9082",
+        "new_name": "Áo Bra Tăm Sẵn Mút Cúc Xinh Xắn"
+    },
+    {
+        "id": 58,
+        "old_name": "Áo Bra Úc Su Tăm Viền Sóng Kèm Mút Siêu Mát Hot Trend A122",
+        "new_name": "Áo Bra Úc Su Tăm Viền Sóng Kèm Mút Siêu Mát Hot Trend"
+    },
+    {
+        "id": 60,
+        "old_name": "Áo Lót Bra Chất Su Thông Hơi 3281",
+        "new_name": "Áo Lót Bra Chất Su Thông Hơi"
+    },
+    {
+        "id": 61,
+        "old_name": "Áo Croptop Chất Vải Su Cao Cấp Sẵn Mút Ôm Body 802",
+        "new_name": "Áo Croptop Chất Vải Su Cao Cấp Sẵn Mút Ôm Body"
+    },
+    {
+        "id": 63,
+        "old_name": "Quần Tất Siêu Dai Mẫu Mới 2019",
+        "new_name": "Quần Tất Siêu Dai Mẫu Mới"
+    },
+    {
+        "id": 70,
+        "old_name": "Áo Lót Úc Su Không Đường May Không Gọng Mút Vừa 2cm Cực Xinh MS1108",
+        "new_name": "Áo Lót Úc Su Không Đường May Không Gọng Mút Vừa 2cm Cực Xinh"
+    },
+    {
+        "id": 72,
+        "old_name": "Quần Lót Ren Đùi Siêu Đẹp B12",
+        "new_name": "Quần Lót Ren Đùi Siêu Đẹp"
+    },
+    {
+        "id": 73,
+        "old_name": "Quần Lót Lọt Khe Dây Thời Trang 2288",
+        "new_name": "Quần Lót Lọt Khe Dây Thời Trang"
+    },
+    {
+        "id": 74,
+        "old_name": "Quần Lót Ren Chữ Y Mềm Mại MS221",
+        "new_name": "Quần Lót Ren Chữ Y Mềm Mại"
+    },
+    {
+        "id": 75,
+        "old_name": "Quần Lót Ren Lọt Khe Dây Chéo 2252",
+        "new_name": "Quần Lót Ren Lọt Khe Dây Chéo"
+    },
+    {
+        "id": 76,
+        "old_name": "Áo Bra Thun Cotton Dáng Dài Ôm Body MS6602",
+        "new_name": "Áo Bra Thun Cotton Dáng Dài Ôm Body"
+    },
+    {
+        "id": 78,
+        "old_name": "Quần Lót Nữ Tam Giác Chất Voan Tuyết Tàng Hình Siêu Nhẹ MS99076",
+        "new_name": "Quần Lót Nữ Tam Giác Chất Voan Tuyết Tàng Hình Siêu Nhẹ"
+    },
+    {
+        "id": 80,
+        "old_name": "Áo Lót Úc Su Không Gọng Mềmút Mỏng Viền Chữ 3285",
+        "new_name": "Áo Lót Úc Su Không Gọng Mềmút Mỏng Viền Chữ"
+    },
+    {
+        "id": 82,
+        "old_name": "Quần Lót Ren Dây Thời Trang Gợi Cảm MS5011",
+        "new_name": "Quần Lót Ren Dây Thời Trang Gợi Cảm"
+    },
+    {
+        "id": 84,
+        "old_name": "Áo Lót Úc Su Mút Mỏng Không Gọng Mềm Mát Ôm Gọn Ngực Có Mút Dày 207",
+        "new_name": "Áo Lót Úc Su Mút Mỏng Không Gọng Mềm Mát Ôm Gọn Ngực Có Mút Dày"
+    },
+    {
+        "id": 87,
+        "old_name": "Quần Lót Lụa Kháng Khuẩn Ren Mông Quyến Rũ MS233",
+        "new_name": "Quần Lót Lụa Kháng Khuẩn Ren Mông Quyến Rũ"
+    },
+    {
+        "id": 88,
+        "old_name": "Áo Bra Ren Buộc Dây Thời Trang MS3510",
+        "new_name": "Áo Bra Ren Buộc Dây Thời Trang"
+    },
+    {
+        "id": 90,
+        "old_name": "Quần Lót Ren Cánh Tiên Ren Mềm Gợi Cảm MS2077",
+        "new_name": "Quần Lót Ren Cánh Tiên Ren Mềm Gợi Cảm"
+    },
+    {
+        "id": 93,
+        "old_name": "Áo Lót Su Khoét Lưng Sâu Có Gọng Nâng Ngực Có Mút Mặc Nhiều Kiểu Hot Hit VA751",
+        "new_name": "Áo Lót Su Khoét Lưng Sâu Có Gọng Nâng Ngực Có Mút Mặc Nhiều Kiểu Hot Hit"
+    },
+    {
+        "id": 97,
+        "old_name": "Áo Lót Mút Mỏng Không Gọng Cotton Form Ôm Ngực Rẻ Đẹp A100",
+        "new_name": "Áo Lót Mút Mỏng Không Gọng Cotton Form Ôm Ngực Rẻ Đẹp"
+    },
+    {
+        "id": 98,
+        "old_name": "Quần Lót Ren Bèo Cánh Tiên Mẫu Mới 8802",
+        "new_name": "Quần Lót Ren Bèo Cánh Tiên Mẫu Mới"
+    },
+    {
+        "id": 99,
+        "old_name": "Quần Lót Lọt Khe Ren Hoa Gợi Cảm MS2268",
+        "new_name": "Quần Lót Lọt Khe Ren Hoa Gợi Cảm"
+    },
+    {
+        "id": 101,
+        "old_name": "Quần Đùi Nâng Mông Cạp Cao Chất Su Co Giãn Cao Cấp N288",
+        "new_name": "Quần Đùi Nâng Mông Cạp Cao Chất Su Co Giãn Cao Cấp"
+    },
+    {
+        "id": 106,
+        "old_name": "Quần Lót Phối Ren Đính Nơ Sau Mẫu Mới MS3041",
+        "new_name": "Quần Lót Phối Ren Đính Nơ Sau Mẫu Mới"
+    },
+    {
+        "id": 110,
+        "old_name": "Quần Mặc Váy Su Viền Sóng Siêu Mát 1054",
+        "new_name": "Quần Mặc Váy Su Viền Sóng Siêu Mát"
+    },
+    {
+        "id": 115,
+        "old_name": "Quần Lót Ren Tua Rua Gợi Cảm 2153",
+        "new_name": "Quần Lót Ren Tua Rua Gợi Cảm"
+    },
+    {
+        "id": 116,
+        "old_name": "Quần Lót Ren Đính Nơ Xuyên Thấu Quyến Rũ M33",
+        "new_name": "Quần Lót Ren Đính Nơ Xuyên Thấu Quyến Rũ"
+    },
+    {
+        "id": 117,
+        "old_name": "Quần Lót Ren Cánh Tiên Khoen Tim Chất Đẹp 2083",
+        "new_name": "Quần Lót Ren Cánh Tiên Khoen Tim Chất Đẹp"
+    },
+    {
+        "id": 118,
+        "old_name": "Quần Lót Ren Hoa Đính Hạt Siêu Đẹp MS2149",
+        "new_name": "Quần Lót Ren Hoa Đính Hạt Siêu Đẹp"
+    },
+    {
+        "id": 119,
+        "old_name": "Áo Bra Tăm Khoét Ngực V Mút Liền MS1833",
+        "new_name": "Áo Bra Tăm Khoét Ngực V Mút Liền"
+    },
+    {
+        "id": 121,
+        "old_name": "Áo Lót Nữ Úc Su Mút Mỏng Thông Hơi Không Gọng MS781",
+        "new_name": "Áo Lót Nữ Úc Su Mút Mỏng Thông Hơi Không Gọng"
+    },
+    {
+        "id": 122,
+        "old_name": "Quần Lót Ren Nữ Cạp Hông 3 Dây Quyến Rũ 347",
+        "new_name": "Quần Lót Ren Nữ Cạp Hông 3 Dây Quyến Rũ"
+    },
+    {
+        "id": 131,
+        "old_name": "Áo Bra Tăm Quyến Rũ AS150",
+        "new_name": "Áo Bra Tăm Quyến Rũ"
+    },
+    {
+        "id": 132,
+        "old_name": "Áo Bra Cotton Màu Trơn Nhún Eo Dây Mảnh Sẵn Mút 231",
+        "new_name": "Áo Bra Cotton Màu Trơn Nhún Eo Dây Mảnh Sẵn Mút"
+    },
+    {
+        "id": 133,
+        "old_name": "Áo Lót Su Không Gọng Nâng Ngực Dây Chữ Trẻ Trung MS422",
+        "new_name": "Áo Lót Su Không Gọng Nâng Ngực Dây Chữ Trẻ Trung"
+    },
+    {
+        "id": 134,
+        "old_name": "Áo Lót Úc Quây Không Dây Có Gọng Cup Ngang MS218",
+        "new_name": "Áo Lót Úc Quây Không Dây Có Gọng Cup Ngang"
+    },
+    {
+        "id": 135,
+        "old_name": "Quần Lót Ren Buộc Dây Họa Tiết Cực Xinh 055",
+        "new_name": "Quần Lót Ren Buộc Dây Họa Tiết Cực Xinh"
+    },
+    {
+        "id": 139,
+        "old_name": "Quần Lót Ren Gợi Cảm MS2321",
+        "new_name": "Quần Lót Ren Gợi Cảm"
+    },
+    {
+        "id": 141,
+        "old_name": "Quần Lót Túi Ví Xinh Xắn, Quần Lót Nữ Viền Ren Co Giãn 466",
+        "new_name": "Quần Lót Túi Ví Xinh Xắn, Quần Lót Nữ Viền Ren Co Giãn"
+    },
+    {
+        "id": 142,
+        "old_name": "Áo Lót Úc Su Không Gọng Mút Bàn Tay Nâng Ngực A01",
+        "new_name": "Áo Lót Úc Su Không Gọng Mút Bàn Tay Nâng Ngực"
+    },
+    {
+        "id": 144,
+        "old_name": "Áo Bra Ren Chun Hoa Nhí Đính Khuy MS3025",
+        "new_name": "Áo Bra Ren Chun Hoa Nhí Đính Khuy"
+    },
+    {
+        "id": 145,
+        "old_name": "Quần Lót Lọt Khe Ren Cao Cấp 8001",
+        "new_name": "Quần Lót Lọt Khe Ren Cao Cấp"
+    },
+    {
+        "id": 148,
+        "old_name": "Quần Lót Su Lụa Ren Cạp Cao Gen Bụng Tàng Hình 331",
+        "new_name": "Quần Lót Su Lụa Ren Cạp Cao Gen Bụng Tàng Hình"
+    },
+    {
+        "id": 150,
+        "old_name": "Áo Bra Ren Hoa Nhí Đính Khuy, Áo Hai Dây Mẫu Mới Croptop MS3026",
+        "new_name": "Áo Bra Ren Hoa Nhí Đính Khuy, Áo Hai Dây Mẫu Mới Croptop"
+    },
+    {
+        "id": 151,
+        "old_name": "Áo Bra 2 Dây Thun Tăm Mềm Mịn Phối Ren Nơ Xinh Xắn MS9081",
+        "new_name": "Áo Bra 2 Dây Thun Tăm Mềm Mịn Phối Ren Nơ Xinh Xắn"
+    },
+    {
+        "id": 152,
+        "old_name": "Quần Lót Su Lụa Tàng Hình Mỏng Mát Thoáng Khí MS9829",
+        "new_name": "Quần Lót Su Lụa Tàng Hình Mỏng Mát Thoáng Khí"
+    },
+    {
+        "id": 155,
+        "old_name": "Quần Lót Ren Hoa Lọt Khe Gợi Cảm MS2263",
+        "new_name": "Quần Lót Ren Hoa Lọt Khe Gợi Cảm"
+    },
+    {
+        "id": 157,
+        "old_name": "Áo Lót Có Gọng Mút Dày 5P Siêu Nâng CK02",
+        "new_name": "Áo Lót Có Gọng Mút Dày 5P Siêu Nâng"
+    },
+    {
+        "id": 158,
+        "old_name": "Áo Croptop Nữ Cotton Trẻ Trung Sẵn Mút Tôn Dáng 525",
+        "new_name": "Áo Croptop Nữ Cotton Trẻ Trung Sẵn Mút Tôn Dáng"
+    },
+    {
+        "id": 161,
+        "old_name": "Áo Lót Cài Ngực Trước 1501",
+        "new_name": "Áo Lót Cài Ngực Trước"
+    },
+    {
+        "id": 163,
+        "old_name": "Áo Lót Ren Mút Dày 5cm Thông Hơi Cài Ngực Trước Siêu Đẹp MS816",
+        "new_name": "Áo Lót Ren Mút Dày 5cm Thông Hơi Cài Ngực Trước Siêu Đẹp"
+    },
+    {
+        "id": 165,
+        "old_name": "Hàng Đẹp - Bra Tăm Cotton 2 Dây Phối Ren Co Giãn Siêu Mát M56",
+        "new_name": "Hàng Đẹp - Bra Tăm Cotton 2 Dây Phối Ren Co Giãn Siêu Mát"
+    },
+    {
+        "id": 170,
+        "old_name": "Quần Lót Ren Nơ Tim Thắt Nơ Hông Iu À 039",
+        "new_name": "Quần Lót Ren Nơ Tim Thắt Nơ Hông Iu À"
+    },
+    {
+        "id": 172,
+        "old_name": "Áo Ngực Quây Có Gọng Chống Tụt Tạo Khe Hở Lưng Dán Silicon Tàng Hình 018",
+        "new_name": "Áo Ngực Quây Có Gọng Chống Tụt Tạo Khe Hở Lưng Dán Silicon Tàng Hình"
+    },
+    {
+        "id": 174,
+        "old_name": "Áo Lót Chống Tụt Cài Trước Có Mút 5P Siêu Nâng Tạo Khe 946",
+        "new_name": "Áo Lót Chống Tụt Cài Trước Có Mút 5P Siêu Nâng Tạo Khe"
+    },
+    {
+        "id": 176,
+        "old_name": "Áo Bra Ren Hoa Siêu Đẹp Mã 343",
+        "new_name": "Áo Bra Ren Hoa Siêu Đẹp Mã"
+    },
+    {
+        "id": 177,
+        "old_name": "Quần Lót Lọt Khe Ren Chữ Y Mềm Mại 8002",
+        "new_name": "Quần Lót Lọt Khe Ren Chữ Y Mềm Mại"
+    },
+    {
+        "id": 179,
+        "old_name": "Quần Lót Nữ Ren Mềm Hông Đđính Nơ Gợi Cảm 2824",
+        "new_name": "Quần Lót Nữ Ren Mềm Hông Đđính Nơ Gợi Cảm"
+    },
+    {
+        "id": 181,
+        "old_name": "Áo Lót Úc Ren Không Gọng Mút Dày 5, 5 Siêu Nâng Ngực MS912",
+        "new_name": "Áo Lót Úc Ren Không Gọng Mút Dày 5, 5 Siêu Nâng Ngực"
+    },
+    {
+        "id": 184,
+        "old_name": "Áo Lót Quây Úc Su Cài Sau Mát Lạnh 269",
+        "new_name": "Áo Lót Quây Úc Su Cài Sau Mát Lạnh"
+    },
+    {
+        "id": 186,
+        "old_name": "Quần Lót Lọt Khe Quyến Rũ MS570",
+        "new_name": "Quần Lót Lọt Khe Quyến Rũ"
+    },
+    {
+        "id": 188,
+        "old_name": "Áo Dán Nâng Ngực Hình Bàn Tay Hàng Cao Cấp P29",
+        "new_name": "Áo Dán Nâng Ngực Hình Bàn Tay Hàng Cao Cấp"
+    },
+    {
+        "id": 273,
+        "old_name": "Bra Su Nước 5501",
+        "new_name": "Bra Su Nước"
+    }
+]
