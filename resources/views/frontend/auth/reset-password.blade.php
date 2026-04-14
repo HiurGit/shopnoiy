@@ -1,8 +1,8 @@
 @extends('frontend.layouts.app')
 
-@section('title', 'Tạo tài khoản')
-@section('meta_title', 'Tạo tài khoản khách hàng')
-@section('meta_description', 'Tạo tài khoản khách hàng để mua sắm nhanh hơn tại Shop Nội Y Buôn Hồ.')
+@section('title', 'Đặt lại mật khẩu')
+@section('meta_title', 'Đặt lại mật khẩu khách hàng')
+@section('meta_description', 'Đặt lại mật khẩu tài khoản khách hàng tại Shop Nội Y Buôn Hồ.')
 @section('meta_robots', 'noindex,nofollow')
 
 @push('head')
@@ -11,128 +11,100 @@
       color: #303330;
     }
 
-    .phone.register-page,
-    .register-page {
+    .phone.reset-page,
+    .reset-page {
       min-height: 100vh;
       padding: 72px 16px 48px;
       background: #ffffff;
       font-family: 'Be Vietnam Pro', sans-serif;
     }
 
-    .register-shell {
+    .reset-shell {
       width: min(100%, 460px);
       margin: 0 auto;
     }
 
-    .register-page .topbar {
+    .reset-page .topbar {
       margin-left: auto;
       margin-right: auto;
       margin-bottom: 12px;
     }
 
-    .register-user-button {
-      width: 36px;
-      height: 36px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 14px;
-      border: 1px solid rgba(148, 163, 184, 0.28);
-      background: linear-gradient(180deg, #ffffff 0%, #f7fafd 100%);
-      box-shadow: 0 10px 20px rgba(30, 41, 59, 0.12);
-      color: #252c2c;
-      text-decoration: none;
-      flex-shrink: 0;
-    }
-
-    .register-page .topbar .register-user-icon {
-      width: 22px;
-      height: 22px;
-      display: inline-block;
-      color: #252c2c;
-    }
-
-    .register-card {
+    .reset-card {
       background: rgba(255, 255, 255, 0.88);
     }
 
-    .register-brand-hero {
+    .reset-brand-hero {
       width: 100%;
       min-height: 140px;
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 30px 24px 4px;
-      /* margin-bottom: 24px; */
     }
 
-    .register-brand-hero img {
+    .reset-brand-hero img {
       max-width: min(100%, 240px);
       max-height: 120px;
       object-fit: contain;
       display: block;
     }
 
-    .register-brand-fallback {
+    .reset-brand-fallback {
       text-align: center;
       color: #303330;
     }
 
-    .register-brand-fallback strong {
+    .reset-brand-fallback strong {
       display: block;
       font-size: clamp(1.8rem, 5vw, 2.4rem);
       letter-spacing: -0.03em;
     }
 
-    .register-brand-fallback span {
+    .reset-brand-fallback span {
       display: block;
       margin-top: 8px;
       font-size: 0.95rem;
       color: #6d6f6b;
     }
 
-    .register-display {
+    .reset-display {
       margin-bottom: 22px;
       text-align: center;
     }
 
-    .register-display h1 {
+    .reset-display h1 {
       margin: 0 0 8px;
-      font-size: clamp(2rem, 6vw, 2.45rem);
+      font-size: clamp(1.8rem, 5vw, 2.2rem);
       color: #533823;
       letter-spacing: -0.03em;
     }
 
-    .register-display p {
+    .reset-display p {
       margin: 0;
       color: #6d6f6b;
       font-size: 0.95rem;
+      line-height: 1.5;
     }
 
-    .register-alert {
+    .reset-alert {
       margin-bottom: 16px;
       padding: 14px 16px;
       border-radius: 18px;
       font-size: 0.92rem;
     }
 
-    .register-alert-success {
-      color: #14532d;
-      background: #dcfce7;
-      border: 1px solid #bbf7d0;
-    }
-
-    .register-alert-error {
+    .reset-alert-error {
       color: #991b1b;
       background: #fee2e2;
       border: 1px solid #fecaca;
     }
 
-    .register-field {
+    .reset-field {
       margin-bottom: 16px;
     }
 
-    .register-label {
+    .reset-label {
       display: block;
       margin-bottom: 8px;
       font-size: 0.78rem;
@@ -141,11 +113,11 @@
       text-transform: uppercase;
     }
 
-    .register-input-wrap {
+    .reset-input-wrap {
       position: relative;
     }
 
-    .register-input {
+    .reset-input {
       width: 100%;
       border: 1px solid #252c2c;
       border-radius: 999px;
@@ -156,18 +128,18 @@
       transition: box-shadow 0.2s ease, transform 0.2s ease;
     }
 
-    .register-input:focus {
+    .reset-input:focus {
       outline: none;
-      box-shadow: 0 0 0 3px rgba(125, 87, 49, 0.18);
+      box-shadow: 0 0 0 3px rgba(37, 44, 44, 0.12);
       transform: translateY(-1px);
     }
 
-    .register-input.is-invalid {
+    .reset-input.is-invalid {
       border-color: #dc2626;
       box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
     }
 
-    .register-field-error {
+    .reset-field-error {
       display: block;
       margin-top: 8px;
       padding-left: 6px;
@@ -176,7 +148,7 @@
       line-height: 1.4;
     }
 
-    .register-input-icon {
+    .reset-input-icon {
       position: absolute;
       top: 50%;
       right: 18px;
@@ -186,7 +158,7 @@
       pointer-events: none;
     }
 
-    .register-input-toggle {
+    .reset-input-toggle {
       position: absolute;
       top: 50%;
       right: 12px;
@@ -204,7 +176,7 @@
       cursor: pointer;
     }
 
-    .register-submit {
+    .reset-submit {
       width: 100%;
       border: 0;
       border-radius: 999px;
@@ -216,24 +188,24 @@
       text-transform: uppercase;
     }
 
-    .register-submit:hover {
+    .reset-submit:hover {
       background: #1d2323;
     }
 
-    .register-footer {
+    .reset-footer {
       margin-top: 22px;
       text-align: center;
       color: #6d6f6b;
       font-size: 0.92rem;
     }
 
-    .register-footer strong {
+    .reset-footer strong {
       display: block;
       margin-bottom: 6px;
       color: #2f241a;
     }
 
-    .register-login-link {
+    .reset-login-link {
       display: inline-flex;
       width: 100%;
       align-items: center;
@@ -248,13 +220,13 @@
       background: transparent;
     }
 
-    .register-login-link:hover {
+    .reset-login-link:hover {
       color: #252c2c;
       background: rgba(37, 44, 44, 0.04);
     }
 
     @media (max-width: 480px) {
-      .register-card {
+      .reset-card {
         padding: 16px;
         border-radius: 24px;
       }
@@ -263,14 +235,14 @@
 @endpush
 
 @section('content')
-  <main class="phone register-page">
-    <div class="register-shell">
+  <main class="phone reset-page">
+    <div class="reset-shell">
       @include('frontend.partials.topbar', [
-        'headerClass' => 'topbar',
+        'headerClass' => 'topbar',
       ])
 
-      <section class="register-card" aria-labelledby="customer-register-title">
-        <div class="register-brand-hero">
+      <section class="reset-card" aria-labelledby="customer-reset-title">
+        <div class="reset-brand-hero">
           @if (!empty($frontendLogoUrl))
             <img
               src="{{ $frontendLogoUrl }}"
@@ -279,86 +251,42 @@
               decoding="async"
             >
           @else
-            <div class="register-brand-fallback">
+            <div class="reset-brand-fallback">
               <strong>{{ $frontendSiteName }}</strong>
-              <span>Tạo tài khoản để mua sắm nhanh hơn cùng shop</span>
+              <span>Đặt lại mật khẩu để tiếp tục mua sắm cùng shop</span>
             </div>
           @endif
         </div>
 
-        <div class="register-display">
-          <h1 id="customer-register-title">Tạo tài khoản</h1>
-       
+        <div class="reset-display">
+          <h1 id="customer-reset-title">Đặt lại mật khẩu</h1>
+          <p>{{ $email }}</p>
         </div>
 
-        @if (session('success'))
-          <div class="register-alert register-alert-success">{{ session('success') }}</div>
+        @if ($errors->any())
+          <div class="reset-alert reset-alert-error">{{ $errors->first() }}</div>
         @endif
 
-        <form method="POST" action="{{ route('frontend.register.submit') }}">
+        <form method="POST" action="{{ route('frontend.password.reset.submit') }}">
           @csrf
+          <input type="hidden" name="token" value="{{ $token }}">
+          <input type="hidden" name="email" value="{{ old('email', $email) }}">
 
-          <div class="register-field">
-            <label for="phone" class="register-label">Số điện thoại</label>
-            <div class="register-input-wrap">
-              <input
-                id="phone"
-                name="phone"
-                type="tel"
-                class="register-input @error('phone') is-invalid @enderror"
-                placeholder="Nhập số điện thoại"
-                value="{{ old('phone') }}"
-                inputmode="tel"
-                autocomplete="tel"
-                required
-              >
-              <span class="register-input-icon">
-                <i class="bi bi-telephone"></i>
-              </span>
-            </div>
-            @error('phone')
-              <span class="register-field-error">{{ $message }}</span>
-            @enderror
-          </div>
-
-          <div class="register-field">
-            <label for="email" class="register-label">Email</label>
-            <div class="register-input-wrap">
-              <input
-                id="email"
-                name="email"
-                type="email"
-                class="register-input @error('email') is-invalid @enderror"
-                placeholder="Nhập email"
-                value="{{ old('email') }}"
-                autocomplete="email"
-                required
-              >
-              <span class="register-input-icon">
-                <i class="bi bi-envelope"></i>
-              </span>
-            </div>
-            @error('email')
-              <span class="register-field-error">{{ $message }}</span>
-            @enderror
-          </div>
-
-          <div class="register-field">
-            <label for="password" class="register-label">Mật khẩu</label>
-            <div class="register-input-wrap">
+          <div class="reset-field">
+            <label for="password" class="reset-label">Mật khẩu mới</label>
+            <div class="reset-input-wrap">
               <input
                 id="password"
                 name="password"
                 type="password"
-                class="register-input @error('password') is-invalid @enderror"
-                placeholder="Nhập mật khẩu"
-                value="{{ old('password') }}"
+                class="reset-input @error('password') is-invalid @enderror"
+                placeholder="Nhập mật khẩu mới"
                 autocomplete="new-password"
                 required
               >
               <button
                 type="button"
-                class="register-input-toggle"
+                class="reset-input-toggle"
                 data-password-toggle
                 data-target="#password"
                 aria-label="Hiện mật khẩu"
@@ -368,26 +296,25 @@
               </button>
             </div>
             @error('password')
-              <span class="register-field-error">{{ $message }}</span>
+              <span class="reset-field-error">{{ $message }}</span>
             @enderror
           </div>
 
-          <div class="register-field">
-            <label for="password_confirmation" class="register-label">Xác nhận mật khẩu</label>
-            <div class="register-input-wrap">
+          <div class="reset-field">
+            <label for="password_confirmation" class="reset-label">Xác nhận mật khẩu</label>
+            <div class="reset-input-wrap">
               <input
                 id="password_confirmation"
                 name="password_confirmation"
                 type="password"
-                class="register-input @error('password') is-invalid @enderror"
-                placeholder="Nhập lại mật khẩu"
-                value="{{ old('password_confirmation') }}"
+                class="reset-input @error('password') is-invalid @enderror"
+                placeholder="Nhập lại mật khẩu mới"
                 autocomplete="new-password"
                 required
               >
               <button
                 type="button"
-                class="register-input-toggle"
+                class="reset-input-toggle"
                 data-password-toggle
                 data-target="#password_confirmation"
                 aria-label="Hiện mật khẩu"
@@ -397,17 +324,14 @@
               </button>
             </div>
             @error('password')
-              <span class="register-field-error">{{ $message }}</span>
+              <span class="reset-field-error">{{ $message }}</span>
             @enderror
           </div>
 
-          <button type="submit" class="register-submit">Tạo tài khoản</button>
+          <button type="submit" class="reset-submit">Đặt lại mật khẩu</button>
         </form>
 
-        <div class="register-footer">
-          <strong>Đã có tài khoản?</strong>
-          <a href="{{ route('frontend.login') }}" class="register-login-link">Đăng nhập</a>
-        </div>
+       
       </section>
     </div>
   </main>

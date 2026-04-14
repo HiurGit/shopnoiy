@@ -51,6 +51,8 @@ Route::get('/dang-ky', [StorefrontController::class, 'showCustomerRegisterForm']
 Route::post('/dang-ky', [StorefrontController::class, 'customerRegister'])->name('frontend.register.submit');
 Route::get('/quen-mat-khau', [StorefrontController::class, 'showCustomerForgotPasswordForm'])->name('frontend.password.forgot');
 Route::post('/quen-mat-khau', [StorefrontController::class, 'customerForgotPassword'])->name('frontend.password.forgot.submit');
+Route::get('/dat-lai-mat-khau/{token}', [StorefrontController::class, 'showCustomerResetPasswordForm'])->name('frontend.password.reset');
+Route::post('/dat-lai-mat-khau', [StorefrontController::class, 'customerResetPassword'])->name('frontend.password.reset.submit');
 Route::middleware('customer.auth')->group(function () {
     Route::get('/tai-khoan', [StorefrontController::class, 'customerProfile'])->name('frontend.profile');
     Route::get('/tai-khoan/lich-su-mua-hang', [StorefrontController::class, 'customerOrderHistory'])->name('frontend.profile.orders');

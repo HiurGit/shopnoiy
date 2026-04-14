@@ -177,6 +177,20 @@
       transform: translateY(-1px);
     }
 
+    .login-input.is-invalid {
+      border-color: #dc2626;
+      box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
+    }
+
+    .login-field-error {
+      display: block;
+      margin-top: 8px;
+      padding-left: 6px;
+      color: #b91c1c;
+      font-size: 0.82rem;
+      line-height: 1.4;
+    }
+
     .login-input-icon {
       position: absolute;
       top: 50%;
@@ -311,10 +325,6 @@
           <div class="login-alert login-alert-success">{{ session('success') }}</div>
         @endif
 
-        @if ($errors->any())
-          <div class="login-alert login-alert-error">{{ $errors->first() }}</div>
-        @endif
-
         <form method="POST" action="{{ route('frontend.login.submit') }}">
           @csrf
 
@@ -325,7 +335,7 @@
                 id="login"
                 name="login"
                 type="text"
-                class="login-input"
+                class="login-input @error('login') is-invalid @enderror"
                 placeholder="0901234567 hoặc email@example.com"
                 value="{{ old('login') }}"
                 autocomplete="username"
@@ -335,6 +345,9 @@
                 <i class="bi bi-person"></i>
               </span>
             </div>
+            @error('login')
+              <span class="login-field-error">{{ $message }}</span>
+            @enderror
           </div>
 
           <div class="login-field">
@@ -344,8 +357,9 @@
                 id="password"
                 name="password"
                 type="password"
-                class="login-input"
+                class="login-input @error('password') is-invalid @enderror"
                 placeholder="Nhập mật khẩu"
+                value="{{ old('password') }}"
                 autocomplete="current-password"
                 required
               >
@@ -360,6 +374,9 @@
                 <i class="bi bi-eye"></i>
               </button>
             </div>
+            @error('password')
+              <span class="login-field-error">{{ $message }}</span>
+            @enderror
           </div>
 
           <div class="login-meta">
@@ -381,6 +398,58 @@
 @push('scripts')
   <script>
     (() => {
+      const loginInput = document.querySelector('#login');
+      const passwordInput = document.querySelector('#password');
+      const loginForm = loginInput ? loginInput.closest('form') : null;
+      const loginStorageKey = 'shopnoiy_saved_login';
+      const passwordStorageKey = 'shopnoiy_saved_password';
+
+      if (loginInput) {
+        const serverValue = loginInput.value.trim();
+        const savedRawValue = localStorage.getItem(loginStorageKey);
+        const savedValue = savedRawValue ? savedRawValue.trim() : '';
+
+        if (!serverValue && savedValue) {
+          loginInput.value = savedValue;
+        }
+
+        if (serverValue) {
+          localStorage.setItem(loginStorageKey, serverValue);
+        }
+      }
+
+      if (passwordInput) {
+        const serverPassword = passwordInput.value;
+        const savedPassword = localStorage.getItem(passwordStorageKey) || '';
+
+        if (!serverPassword && savedPassword) {
+          passwordInput.value = savedPassword;
+        }
+
+        if (serverPassword) {
+          localStorage.setItem(passwordStorageKey, serverPassword);
+        }
+      }
+
+      if (loginForm && loginInput) {
+        loginForm.addEventListener('submit', () => {
+          const currentValue = loginInput.value.trim();
+          const currentPassword = passwordInput ? passwordInput.value : '';
+
+          if (currentValue) {
+            localStorage.setItem(loginStorageKey, currentValue);
+          } else {
+            localStorage.removeItem(loginStorageKey);
+          }
+
+          if (currentPassword) {
+            localStorage.setItem(passwordStorageKey, currentPassword);
+          } else {
+            localStorage.removeItem(passwordStorageKey);
+          }
+        });
+      }
+
       document.querySelectorAll('[data-password-toggle]').forEach((toggleBtn) => {
         const targetSelector = toggleBtn.getAttribute('data-target');
         const input = targetSelector ? document.querySelector(targetSelector) : null;

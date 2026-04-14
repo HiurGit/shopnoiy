@@ -2,7 +2,7 @@
 
 @section('title', 'Quên mật khẩu')
 @section('meta_title', 'Quên mật khẩu khách hàng')
-@section('meta_description', 'Giao diện quên mật khẩu dành cho khách hàng tại Shop Nội Y Buôn Hồ.')
+@section('meta_description', 'Nhập số điện thoại hoặc email để đặt lại mật khẩu tại Shop Nội Y Buôn Hồ.')
 @section('meta_robots', 'noindex,nofollow')
 
 @push('head')
@@ -28,28 +28,6 @@
       margin-left: auto;
       margin-right: auto;
       margin-bottom: 12px;
-    }
-
-    .forgot-user-button {
-      width: 36px;
-      height: 36px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 14px;
-      border: 1px solid rgba(148, 163, 184, 0.28);
-      background: linear-gradient(180deg, #ffffff 0%, #f7fafd 100%);
-      box-shadow: 0 10px 20px rgba(30, 41, 59, 0.12);
-      color: #252c2c;
-      text-decoration: none;
-      flex-shrink: 0;
-    }
-
-    .forgot-page .topbar .forgot-user-icon {
-      width: 22px;
-      height: 22px;
-      display: inline-block;
-      color: #252c2c;
     }
 
     .forgot-card {
@@ -83,14 +61,21 @@
       letter-spacing: -0.03em;
     }
 
+    .forgot-brand-fallback span {
+      display: block;
+      margin-top: 8px;
+      font-size: 0.95rem;
+      color: #6d6f6b;
+    }
+
     .forgot-display {
-      margin-bottom: 18px;
+      margin-bottom: 22px;
       text-align: center;
     }
 
     .forgot-display h1 {
       margin: 0 0 8px;
-      font-size: clamp(1.8rem, 5vw, 2.2rem);
+      font-size: clamp(2rem, 6vw, 2.45rem);
       color: #533823;
       letter-spacing: -0.03em;
     }
@@ -151,8 +136,22 @@
 
     .forgot-input:focus {
       outline: none;
-      box-shadow: 0 0 0 3px rgba(37, 44, 44, 0.12);
+      box-shadow: 0 0 0 3px rgba(125, 87, 49, 0.18);
       transform: translateY(-1px);
+    }
+
+    .forgot-input.is-invalid {
+      border-color: #dc2626;
+      box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
+    }
+
+    .forgot-field-error {
+      display: block;
+      margin-top: 8px;
+      padding-left: 6px;
+      color: #b91c1c;
+      font-size: 0.82rem;
+      line-height: 1.4;
     }
 
     .forgot-input-icon {
@@ -213,6 +212,13 @@
       color: #252c2c;
       background: rgba(37, 44, 44, 0.04);
     }
+
+    @media (max-width: 480px) {
+      .forgot-card {
+        padding: 16px;
+        border-radius: 24px;
+      }
+    }
   </style>
 @endpush
 
@@ -220,7 +226,7 @@
   <main class="phone forgot-page">
     <div class="forgot-shell">
       @include('frontend.partials.topbar', [
-        'headerClass' => 'topbar',
+        'headerClass' => 'topbar',
       ])
 
       <section class="forgot-card" aria-labelledby="customer-forgot-title">
@@ -235,21 +241,18 @@
           @else
             <div class="forgot-brand-fallback">
               <strong>{{ $frontendSiteName }}</strong>
+              <span>Khôi phục tài khoản để tiếp tục mua sắm</span>
             </div>
           @endif
         </div>
 
         <div class="forgot-display">
           <h1 id="customer-forgot-title">Quên mật khẩu</h1>
-          <p>Nhập số điện thoại hoặc email để tiếp tục quy trình khôi phục mật khẩu.</p>
+          <p>Nhập số điện thoại hoặc email </br>Để nhận mail khôi phục.</p>
         </div>
 
         @if (session('success'))
           <div class="forgot-alert forgot-alert-success">{{ session('success') }}</div>
-        @endif
-
-        @if ($errors->any())
-          <div class="forgot-alert forgot-alert-error">{{ $errors->first() }}</div>
         @endif
 
         <form method="POST" action="{{ route('frontend.password.forgot.submit') }}">
@@ -262,7 +265,7 @@
                 id="login"
                 name="login"
                 type="text"
-                class="forgot-input"
+                class="forgot-input @error('login') is-invalid @enderror"
                 placeholder="0901234567 hoặc email@example.com"
                 value="{{ old('login') }}"
                 autocomplete="username"
@@ -272,13 +275,16 @@
                 <i class="bi bi-person"></i>
               </span>
             </div>
+            @error('login')
+              <span class="forgot-field-error">{{ $message }}</span>
+            @enderror
           </div>
 
-          <button type="submit" class="forgot-submit">Tiếp tục</button>
+          <button type="submit" class="forgot-submit">Khôi phục</button>
         </form>
 
         <div class="forgot-footer">
-          <strong>Nhớ lại mật khẩu rồi?</strong>
+          <strong>Đã nhớ mật khẩu?</strong>
           <a href="{{ route('frontend.login') }}" class="forgot-login-link">Đăng nhập</a>
         </div>
       </section>

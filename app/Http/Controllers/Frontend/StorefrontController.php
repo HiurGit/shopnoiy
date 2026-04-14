@@ -11,6 +11,7 @@ use App\Models\ProductTarget;
 use App\Models\PromoTicker;
 use App\Models\Store;
 use App\Models\User;
+use App\Notifications\FrontendResetPasswordNotification;
 use BaconQrCode\Renderer\ImageRenderer;
 use BaconQrCode\Renderer\Image\SvgImageBackEnd;
 use BaconQrCode\Renderer\RendererStyle\RendererStyle;
@@ -26,6 +27,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -54,13 +56,24 @@ class StorefrontController extends Controller
 
     public function customerLogin(Request $request): RedirectResponse
     {
-        $credentials = $request->validate([
+        $validator = Validator::make($request->all(), [
             'login' => ['required', 'string', 'max:255'],
             'password' => ['required', 'string'],
         ], [
             'login.required' => 'Vui lòng nhập số điện thoại hoặc email.',
             'password.required' => 'Vui lòng nhập mật khẩu.',
         ]);
+
+        if ($validator->fails()) {
+            return back()
+                ->withErrors($validator)
+                ->withInput($request->only([
+                    'login',
+                    'password',
+                ]));
+        }
+
+        $credentials = $validator->validated();
 
         $loginInput = trim((string) $credentials['login']);
         $normalizedPhone = $this->normalizePhone($loginInput);
@@ -84,7 +97,10 @@ class StorefrontController extends Controller
 
         if (!$customer || !Hash::check((string) $credentials['password'], (string) $customer->getAuthPassword())) {
             return back()
-                ->withInput($request->only('login'))
+                ->withInput($request->only([
+                    'login',
+                    'password',
+                ]))
                 ->withErrors([
                     'login' => 'Thông tin đăng nhập hoặc mật khẩu chưa đúng.',
                 ]);
@@ -143,7 +159,16 @@ class StorefrontController extends Controller
             }
         });
 
-        $validator->validate();
+        if ($validator->fails()) {
+            return back()
+                ->withErrors($validator)
+                ->withInput($request->only([
+                    'phone',
+                    'email',
+                    'password',
+                    'password_confirmation',
+                ]));
+        }
 
         $customer = User::query()->create([
             'full_name' => 'Khách hàng mới',
@@ -157,11 +182,14 @@ class StorefrontController extends Controller
 
         $this->syncCustomerProfileByUserId((int) $customer->id);
 
-        Auth::login($customer);
-        $request->session()->regenerate();
+        $prefilledLogin = $normalizedPhone ?: $normalizedEmail;
 
         return redirect()
-            ->intended(route('frontend.home'))
+            ->route('frontend.login')
+            ->withInput([
+                'login' => $prefilledLogin,
+                'password' => (string) $request->input('password'),
+            ])
             ->with('success', 'Tạo tài khoản thành công.');
     }
 
@@ -176,13 +204,113 @@ class StorefrontController extends Controller
 
     public function customerForgotPassword(Request $request): RedirectResponse
     {
-        $request->validate([
+        $validated = $request->validate([
             'login' => ['required', 'string', 'max:255'],
         ], [
-            'login.required' => 'Vui lÃ²ng nháº­p sá»‘ Ä‘iá»‡n thoáº¡i hoáº·c email.',
+            'login.required' => 'Vui long nhap so dien thoai hoac email.',
         ]);
 
-        return back()->with('success', 'Giao diá»‡n quÃªn máº­t kháº©u Ä‘Ã£ sáºµn sÃ ng. Chá»©c nÄƒng khá»‹i phá»¥c máº­t kháº©u sáº½ Ä‘Æ°á»£c bá»• sung sau.');
+        $login = trim((string) $validated['login']);
+        $normalizedPhone = $this->normalizePhone($login);
+        $normalizedEmail = $this->normalizeEmail($login);
+
+        $customer = User::query()
+            ->where('role', 'customer')
+            ->where('status', 'active')
+            ->where(function ($query) use ($normalizedPhone, $normalizedEmail): void {
+                if ($normalizedPhone) {
+                    $query->orWhere('phone', $normalizedPhone);
+                }
+
+                if ($normalizedEmail) {
+                    $query->orWhereRaw('LOWER(email) = ?', [$normalizedEmail]);
+                }
+            })
+            ->first();
+
+        if (!$customer || empty($customer->email)) {
+            return back()->with('success', 'Nếu thông tin hợp lệ, hệ thống đã gửi email đặt lại mật khẩu. Vui lòng kiểm tra hộp thư của bạn.');
+        }
+
+        $status = Password::broker('users')->sendResetLink(
+            ['email' => $this->normalizeEmail((string) $customer->email)],
+            function (User $user, string $token): void {
+                $user->notify(new FrontendResetPasswordNotification($token));
+            }
+        );
+
+        if ($status === Password::RESET_THROTTLED) {
+            return back()
+                ->withInput($request->only('login'))
+                ->withErrors([
+                    'login' => 'Ban vua yeu cau dat lai mat khau. Vui long thu lai sau it phut.',
+                ]);
+        }
+
+        return back()->with('success', 'Neu thong tin hop le, he thong da gui email dat lai mat khau. Vui long kiem tra hop thu cua ban.');
+    }
+
+    public function showCustomerResetPasswordForm(Request $request, string $token): View|RedirectResponse
+    {
+        if (Auth::check() && Auth::user()?->role === 'customer') {
+            return redirect()->route('frontend.home');
+        }
+
+        $email = $this->normalizeEmail((string) $request->query('email', ''));
+        if (!$email) {
+            return redirect()
+                ->route('frontend.password.forgot')
+                ->withErrors([
+                    'login' => 'Lien ket dat lai mat khau khong hop le.',
+                ]);
+        }
+
+        return view('frontend.auth.reset-password', [
+            'token' => $token,
+            'email' => $email,
+        ]);
+    }
+
+    public function customerResetPassword(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'token' => ['required', 'string'],
+            'email' => ['required', 'email', 'max:255'],
+            'password' => ['required', 'string', 'min:6', 'confirmed'],
+        ], [
+            'email.required' => 'Thieu email khoi phuc mat khau.',
+            'email.email' => 'Email khoi phuc khong hop le.',
+            'password.required' => 'Vui long nhap mat khau moi.',
+            'password.min' => 'Mat khau moi phai co it nhat 6 ky tu.',
+            'password.confirmed' => 'Xac nhan mat khau chua khop.',
+        ]);
+
+        $validated['email'] = (string) $this->normalizeEmail((string) $validated['email']);
+
+        $status = Password::broker('users')->reset(
+            $validated,
+            function (User $user, string $password): void {
+                $user->forceFill([
+                    'password_hash' => Hash::make($password),
+                ])->save();
+            }
+        );
+
+        if ($status !== Password::PASSWORD_RESET) {
+            return back()
+                ->withInput($request->only('email'))
+                ->withErrors([
+                    'email' => 'Lien ket dat lai mat khau khong hop le hoac da het han.',
+                ]);
+        }
+
+        return redirect()
+            ->route('frontend.login')
+            ->withInput([
+                'login' => $validated['email'],
+                'password' => (string) $request->input('password'),
+            ])
+            ->with('success', 'Dat lai mat khau thanh cong. Ban co the dang nhap ngay.');
     }
 
     public function showCustomerChangePasswordForm(): View|RedirectResponse
