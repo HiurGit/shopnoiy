@@ -1,4 +1,4 @@
-﻿@extends('frontend.layouts.app')
+@extends('frontend.layouts.app')
 
 @section('title', 'Trang chủ')
 @section('meta_title', 'Trang chủ')
@@ -9,32 +9,19 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 @endpush
 
+@section('body_class', $promoTicker ? '' : 'promo-hidden')
+
 @section('content')
 <main class="phone">
   @if ($promoTicker)
     <section class="promo-ticker" aria-label="Khuyến mãi nổi bật" style="background: {{ $promoTicker->background_style ?: 'linear-gradient(90deg,#2c3e50,#355c7d,#2c3e50)' }}; color: {{ $promoTicker->text_color ?: '#ffffff' }};">
       <div class="promo-ticker-track">
-        <span>{{ $promoTicker->content_text }}</span>
+        <span class="promo-ticker-text">{{ $promoTicker->content_text }}</span>
       </div>
     </section>
   @endif
 
-  <header class="topbar">
-    <div class="topbar-row">
-      @include('frontend.partials.logo')
-      <a href="{{ route('frontend.search') }}" class="search-form topbar-search search-entry-link" aria-label="Mở tìm kiếm">
-        <i class="bi bi-search search-icon"></i>
-        <span class="search-entry-text">Tìm sản phẩm...</span>
-        <span class="search-entry-btn">Tìm</span>
-      </a>
-      <div class="actions">
-        <a href="{{ route('frontend.cart') }}" class="bell-wrap" aria-label="Mở giỏ hàng">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" data-slot="icon" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"></path></svg>
-        </a>
-        <i class="bi bi-person-circle"></i>
-      </div>
-    </div>
-  </header>
+  @include('frontend.partials.topbar')
 
   @if ($heroSectionActive)
   <section class="hero-main hero-swiper swiper" aria-label="Banner nổi bật" wire:ignore>

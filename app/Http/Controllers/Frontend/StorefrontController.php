@@ -19,9 +19,11 @@ use App\Services\OrderEmailService;
 use App\Services\SePayWebhookService;
 use App\Services\TelegramOrderNotificationService;
 use App\Support\FrontendProductSearch;
+use App\Support\UploadPath;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\URL;
@@ -29,6 +31,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -38,6 +41,435 @@ class StorefrontController extends Controller
         private readonly OrderEmailService $orderEmailService,
         private readonly TelegramOrderNotificationService $telegramOrderNotificationService
     ) {
+    }
+
+    public function showCustomerLoginForm(): View|RedirectResponse
+    {
+        if (Auth::check() && Auth::user()?->role === 'customer') {
+            return redirect()->route('frontend.home');
+        }
+
+        return view('frontend.auth.login');
+    }
+
+    public function customerLogin(Request $request): RedirectResponse
+    {
+        $credentials = $request->validate([
+            'login' => ['required', 'string', 'max:255'],
+            'password' => ['required', 'string'],
+        ], [
+            'login.required' => 'Vui lòng nhập số điện thoại hoặc email.',
+            'password.required' => 'Vui lòng nhập mật khẩu.',
+        ]);
+
+        $loginInput = trim((string) $credentials['login']);
+        $normalizedPhone = $this->normalizePhone($loginInput);
+        $normalizedEmail = $this->normalizeEmail($loginInput);
+
+        $customerQuery = User::query()
+            ->where('role', 'customer')
+            ->where('status', 'active');
+
+        $customer = $customerQuery
+            ->where(function ($query) use ($normalizedPhone, $normalizedEmail): void {
+                if ($normalizedPhone) {
+                    $query->orWhere('phone', $normalizedPhone);
+                }
+
+                if ($normalizedEmail) {
+                    $query->orWhereRaw('LOWER(email) = ?', [$normalizedEmail]);
+                }
+            })
+            ->first();
+
+        if (!$customer || !Hash::check((string) $credentials['password'], (string) $customer->getAuthPassword())) {
+            return back()
+                ->withInput($request->only('login'))
+                ->withErrors([
+                    'login' => 'Thông tin đăng nhập hoặc mật khẩu chưa đúng.',
+                ]);
+        }
+
+        Auth::login($customer, $request->boolean('remember'));
+        $request->session()->regenerate();
+
+        $customer->forceFill([
+            'last_login_at' => now(),
+        ])->save();
+
+        return redirect()
+            ->intended(route('frontend.home'))
+            ->with('success', 'Đăng nhập thành công.');
+    }
+
+    public function showCustomerRegisterForm(): View|RedirectResponse
+    {
+        if (Auth::check() && Auth::user()?->role === 'customer') {
+            return redirect()->route('frontend.home');
+        }
+
+        return view('frontend.auth.register');
+    }
+
+    public function customerRegister(Request $request): RedirectResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'phone' => ['required', 'string', 'max:20'],
+            'email' => ['required', 'email', 'max:255'],
+            'password' => ['required', 'string', 'min:6', 'confirmed'],
+        ], [
+            'phone.required' => 'Vui lòng nhập số điện thoại.',
+            'email.required' => 'Vui lòng nhập email.',
+            'email.email' => 'Email không hợp lệ.',
+            'password.required' => 'Vui lòng nhập mật khẩu.',
+            'password.min' => 'Mật khẩu phải có ít nhất 6 ký tự.',
+            'password.confirmed' => 'Xác nhận mật khẩu chưa khớp.',
+        ]);
+
+        $normalizedPhone = $this->normalizePhone((string) $request->input('phone'));
+        $normalizedEmail = $this->normalizeEmail((string) $request->input('email'));
+
+        $validator->after(function ($validator) use ($normalizedPhone, $normalizedEmail): void {
+            if (!$normalizedPhone || !preg_match('/^0\d{9}$/', $normalizedPhone)) {
+                $validator->errors()->add('phone', 'Số điện thoại phải đúng định dạng Việt Nam gồm 10 số.');
+            }
+
+            if ($normalizedPhone && User::query()->where('phone', $normalizedPhone)->exists()) {
+                $validator->errors()->add('phone', 'Số điện thoại này đã được sử dụng.');
+            }
+
+            if ($normalizedEmail && User::query()->whereRaw('LOWER(email) = ?', [$normalizedEmail])->exists()) {
+                $validator->errors()->add('email', 'Email này đã được sử dụng.');
+            }
+        });
+
+        $validator->validate();
+
+        $customer = User::query()->create([
+            'full_name' => 'Khách hàng mới',
+            'email' => $normalizedEmail,
+            'phone' => $normalizedPhone,
+            'password_hash' => (string) $request->input('password'),
+            'role' => 'customer',
+            'status' => 'active',
+            'last_login_at' => now(),
+        ]);
+
+        $this->syncCustomerProfileByUserId((int) $customer->id);
+
+        Auth::login($customer);
+        $request->session()->regenerate();
+
+        return redirect()
+            ->intended(route('frontend.home'))
+            ->with('success', 'Tạo tài khoản thành công.');
+    }
+
+    public function showCustomerForgotPasswordForm(): View|RedirectResponse
+    {
+        if (Auth::check() && Auth::user()?->role === 'customer') {
+            return redirect()->route('frontend.home');
+        }
+
+        return view('frontend.auth.forgot-password');
+    }
+
+    public function customerForgotPassword(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'login' => ['required', 'string', 'max:255'],
+        ], [
+            'login.required' => 'Vui lÃ²ng nháº­p sá»‘ Ä‘iá»‡n thoáº¡i hoáº·c email.',
+        ]);
+
+        return back()->with('success', 'Giao diá»‡n quÃªn máº­t kháº©u Ä‘Ã£ sáºµn sÃ ng. Chá»©c nÄƒng khá»‹i phá»¥c máº­t kháº©u sáº½ Ä‘Æ°á»£c bá»• sung sau.');
+    }
+
+    public function showCustomerChangePasswordForm(): View|RedirectResponse
+    {
+        $user = Auth::user();
+        if (!$user || $user->role !== 'customer') {
+            return redirect()->route('frontend.login');
+        }
+
+        return view('frontend.auth.change-password');
+    }
+
+    public function customerChangePassword(Request $request): RedirectResponse
+    {
+        $user = Auth::user();
+        if (!$user || $user->role !== 'customer') {
+            return redirect()->route('frontend.login');
+        }
+
+        $validated = $request->validate([
+            'current_password' => ['required', 'string'],
+            'password' => ['required', 'string', 'min:6', 'confirmed'],
+        ], [
+            'current_password.required' => 'Vui lòng nhập mật khẩu hiện tại.',
+            'password.required' => 'Vui lòng nhập mật khẩu mới.',
+            'password.min' => 'Mật khẩu mới phải có ít nhất 6 ký tự.',
+            'password.confirmed' => 'Xác nhận mật khẩu chưa khớp.',
+        ]);
+
+        if (!Hash::check((string) $validated['current_password'], (string) $user->getAuthPassword())) {
+            return back()->withErrors([
+                'current_password' => 'Mật khẩu hiện tại không đúng.',
+            ])->withInput($request->except(['current_password', 'password', 'password_confirmation']));
+        }
+
+        $user->forceFill([
+            'password_hash' => Hash::make((string) $validated['password']),
+        ])->save();
+
+        return redirect()
+            ->route('frontend.password.change')
+            ->with('success', 'Đổi mật khẩu thành công.');
+    }
+
+    public function customerUpdateProfileInfo(Request $request): RedirectResponse
+    {
+        $user = Auth::user();
+        if (!$user || $user->role !== 'customer') {
+            return redirect()->route('frontend.login');
+        }
+
+        $validated = $request->validate([
+            'full_name' => ['required', 'string', 'max:150'],
+        ], [
+            'full_name.required' => 'Vui lòng nhập họ và tên.',
+            'full_name.max' => 'Họ và tên tối đa 150 ký tự.',
+        ]);
+
+        $user->forceFill([
+            'full_name' => trim((string) $validated['full_name']),
+        ])->save();
+
+        return redirect()
+            ->route('frontend.profile')
+            ->with('success', 'Cập nhật thông tin cá nhân thành công.');
+    }
+
+    public function customerUpdateAddress(Request $request): RedirectResponse
+    {
+        $user = Auth::user();
+        if (!$user || $user->role !== 'customer') {
+            return redirect()->route('frontend.login');
+        }
+
+        $validated = $request->validate([
+            'province' => ['required', 'string', 'max:120'],
+            'district' => ['required', 'string', 'max:120'],
+            'ward' => ['required', 'string', 'max:120'],
+            'address_line' => ['required', 'string', 'min:5', 'max:255'],
+        ], [
+            'province.required' => 'Vui lòng chọn tỉnh/thành phố.',
+            'district.required' => 'Vui lòng chọn quận/huyện.',
+            'ward.required' => 'Vui lòng chọn phường/xã.',
+            'address_line.required' => 'Vui lòng nhập số nhà, tên đường.',
+            'address_line.min' => 'Địa chỉ chi tiết cần ít nhất 5 ký tự.',
+        ]);
+
+        $this->upsertCustomerDefaultAddress(
+            $user,
+            [
+                'province' => trim((string) $validated['province']),
+                'district' => trim((string) $validated['district']),
+                'ward' => trim((string) $validated['ward']),
+                'address_line' => trim((string) $validated['address_line']),
+            ],
+            trim((string) ($user->full_name ?? '')) ?: 'Khách hàng',
+            $this->normalizeVietnamPhone((string) ($user->phone ?? ''))
+        );
+
+        return redirect()
+            ->route('frontend.profile')
+            ->with('success', 'Cập nhật địa chỉ thành công.');
+    }
+
+    public function customerUpdateAvatar(Request $request): RedirectResponse
+    {
+        $user = Auth::user();
+        if (!$user || $user->role !== 'customer') {
+            return redirect()->route('frontend.login');
+        }
+
+        $validated = $request->validate([
+            'avatar' => ['required', 'image', 'mimes:jpeg,jpg,png,webp', 'max:2048'],
+        ], [
+            'avatar.required' => 'Vui lòng chọn ảnh đại diện.',
+            'avatar.image' => 'Tệp tải lên phải là hình ảnh.',
+            'avatar.mimes' => 'Ảnh đại diện chỉ hỗ trợ JPG, PNG hoặc WEBP.',
+            'avatar.max' => 'Ảnh đại diện tối đa 2MB.',
+        ]);
+
+        $file = $validated['avatar'];
+        $directory = UploadPath::absolute('users');
+        if (!is_dir($directory)) {
+            mkdir($directory, 0755, true);
+        }
+
+        $extension = strtolower((string) $file->getClientOriginalExtension());
+        $fileName = 'avatar_' . $user->id . '_' . Str::random(12) . '.' . $extension;
+        $file->move($directory, $fileName);
+
+        $newAvatarPath = '/' . trim(UploadPath::relative('users') . '/' . $fileName, '/');
+        $oldAvatarPath = trim((string) ($user->avatar_url ?? ''));
+        $usersPrefix = '/' . trim(UploadPath::relative('users'), '/') . '/';
+        if ($oldAvatarPath !== '' && str_starts_with($oldAvatarPath, $usersPrefix)) {
+            $oldFile = public_path(ltrim($oldAvatarPath, '/'));
+            if (is_file($oldFile)) {
+                @unlink($oldFile);
+            }
+        }
+
+        $user->forceFill([
+            'avatar_url' => $newAvatarPath,
+        ])->save();
+
+        return redirect()
+            ->route('frontend.profile')
+            ->with('success', 'Cập nhật ảnh đại diện thành công.');
+    }
+
+    public function customerOrderHistory(): View|RedirectResponse
+    {
+        $user = Auth::user();
+        if (!$user || $user->role !== 'customer') {
+            return redirect()->route('frontend.login');
+        }
+
+        $orders = Order::query()
+            ->where('user_id', $user->id)
+            ->latest('created_at')
+            ->paginate(12);
+
+        return view('frontend.auth.order-history', [
+            'customerOrders' => $orders,
+        ]);
+    }
+
+    public function customerOrderDetail(Order $order): View|RedirectResponse
+    {
+        $user = Auth::user();
+        if (!$user || $user->role !== 'customer') {
+            return redirect()->route('frontend.login');
+        }
+
+        if ((int) ($order->user_id ?? 0) !== (int) $user->id) {
+            abort(404);
+        }
+
+        $orderItems = DB::table('order_items')
+            ->where('order_id', $order->id)
+            ->orderBy('id')
+            ->get();
+        $orderItemImageFallback = 'https://images.unsplash.com/photo-1581044777550-4cfa60707c03?auto=format&fit=crop&w=300&q=80';
+        $orderItemProductIds = $orderItems
+            ->pluck('product_id')
+            ->map(fn ($id) => (int) $id)
+            ->filter(fn (int $id) => $id > 0)
+            ->unique()
+            ->values()
+            ->all();
+        $orderItemImageByProduct = $this->primaryImagesByProductIds($orderItemProductIds, $orderItemImageFallback);
+        $orderItems = $orderItems->map(function ($item) use ($orderItemImageByProduct, $orderItemImageFallback) {
+            $productId = (int) ($item->product_id ?? 0);
+            $item->image_url = $orderItemImageByProduct[$productId] ?? $orderItemImageFallback;
+
+            return $item;
+        });
+
+        $orderPayment = DB::table('order_payments')
+            ->where('order_id', $order->id)
+            ->orderByDesc('id')
+            ->first();
+
+        $pickupStore = null;
+        if ((string) $order->delivery_type === 'pickup' && !empty($order->store_id)) {
+            $pickupStore = DB::table('stores')->where('id', $order->store_id)->first();
+        }
+
+        return view('frontend.auth.order-detail', [
+            'customerOrder' => $order,
+            'customerOrderItems' => $orderItems,
+            'customerOrderPayment' => $orderPayment,
+            'customerOrderPickupStore' => $pickupStore,
+        ]);
+    }
+
+    public function customerProfile(): View|RedirectResponse
+    {
+        $user = Auth::user();
+        if (!$user || $user->role !== 'customer') {
+            return redirect()->route('frontend.login');
+        }
+
+        $profile = DB::table('customer_profiles')
+            ->where('user_id', $user->id)
+            ->first();
+        $defaultAddress = DB::table('customer_addresses')
+            ->where('user_id', $user->id)
+            ->orderByDesc('is_default')
+            ->orderByDesc('id')
+            ->first();
+
+        $allOrders = Order::query()
+            ->where('user_id', $user->id);
+
+        $verifiedOrders = Order::query()
+            ->where('user_id', $user->id)
+            ->where('order_status', 'verified');
+        $placedOrdersCount = (clone $allOrders)->count();
+        $verifiedOrdersCount = (clone $verifiedOrders)->count();
+        $verifiedTotalSpent = (clone $verifiedOrders)->sum('total_amount');
+
+        $recentOrders = Order::query()
+            ->where('user_id', $user->id)
+            ->latest('created_at')
+            ->limit(5)
+            ->get();
+
+        $tierLabels = [
+            'new' => 'Khách hàng mới',
+            'friendly' => 'Khách hàng thân thiện',
+            'loyal' => 'Khách hàng trung thành',
+            'vip' => 'Khách hàng VIP',
+            'diamond' => 'Khách hàng Kim cương',
+        ];
+
+        $displayName = trim((string) ($user->full_name ?: $user->email ?: 'Khách hàng'));
+        $nameParts = preg_split('/\s+/u', $displayName, -1, PREG_SPLIT_NO_EMPTY) ?: [];
+        $initials = collect($nameParts)
+            ->take(2)
+            ->map(fn ($part) => mb_strtoupper(mb_substr($part, 0, 1)))
+            ->implode('');
+
+        return view('frontend.auth.profile', [
+            'customerUser' => $user,
+            'customerDisplayName' => $displayName,
+            'customerInitials' => $initials !== '' ? $initials : 'KH',
+            'customerProfile' => $profile,
+            'customerTierLabel' => $tierLabels[(string) ($profile->tier ?? 'new')] ?? 'Khách hàng mới',
+            'customerJoinedLabel' => optional($user->created_at)->format('d/m/Y') ?: now()->format('d/m/Y'),
+            'customerPlacedOrders' => (int) $placedOrdersCount,
+            'customerTotalSpent' => (float) ($profile->total_spent ?? $verifiedTotalSpent),
+            'customerTotalOrders' => (int) ($profile->total_orders ?? $verifiedOrdersCount),
+            'customerRewardPoints' => (int) floor(((float) ($profile->total_spent ?? 0)) / 10000),
+            'customerRecentOrders' => $recentOrders,
+            'customerDefaultAddress' => $defaultAddress,
+        ]);
+    }
+
+    public function customerLogout(Request $request): RedirectResponse
+    {
+        if (Auth::check() && Auth::user()?->role === 'customer') {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+        }
+
+        return redirect()->route('frontend.home')->with('success', 'Da dang xuat.');
     }
 
     private function normalizePhone(?string $phone): ?string
@@ -52,6 +484,42 @@ class StorefrontController extends Controller
         $normalized = trim(mb_strtolower((string) $email));
 
         return $normalized !== '' ? $normalized : null;
+    }
+
+    private function upsertCustomerDefaultAddress(User $user, array $address, string $recipientName, string $recipientPhone): void
+    {
+        $existingDefault = DB::table('customer_addresses')
+            ->where('user_id', $user->id)
+            ->where('is_default', 1)
+            ->orderByDesc('id')
+            ->first();
+
+        $payload = [
+            'recipient_name' => $recipientName !== '' ? $recipientName : (trim((string) ($user->full_name ?? '')) ?: 'Khách hàng'),
+            'recipient_phone' => $recipientPhone !== '' ? $recipientPhone : (string) ($user->phone ?? ''),
+            'province' => trim((string) ($address['province'] ?? '')),
+            'district' => trim((string) ($address['district'] ?? '')),
+            'ward' => trim((string) ($address['ward'] ?? '')),
+            'address_line' => trim((string) ($address['address_line'] ?? '')),
+            'is_default' => 1,
+            'updated_at' => now(),
+        ];
+
+        if ($existingDefault) {
+            DB::table('customer_addresses')
+                ->where('id', $existingDefault->id)
+                ->update($payload);
+            return;
+        }
+
+        DB::table('customer_addresses')
+            ->where('user_id', $user->id)
+            ->update(['is_default' => 0, 'updated_at' => now()]);
+
+        DB::table('customer_addresses')->insert(array_merge($payload, [
+            'user_id' => $user->id,
+            'created_at' => now(),
+        ]));
     }
 
     private function resolveCustomerTier(float $totalSpent): string
@@ -1060,23 +1528,66 @@ class StorefrontController extends Controller
 
     public function checkout(): View
     {
+        $authUser = Auth::user();
+        $checkoutCustomer = ($authUser && $authUser->role === 'customer') ? $authUser : null;
+        $checkoutPrefillName = $checkoutCustomer ? trim((string) $checkoutCustomer->full_name) : '';
+        $checkoutPrefillPhone = $checkoutCustomer ? $this->normalizeVietnamPhone((string) ($checkoutCustomer->phone ?? '')) : '';
+        $checkoutPrefillEmail = $checkoutCustomer ? (string) ($this->normalizeEmail((string) ($checkoutCustomer->email ?? '')) ?? '') : '';
+        $checkoutLockContact = $checkoutCustomer !== null;
+
         $cartItems = collect();
         $stores = DB::table('stores')
             ->where('status', 'active')
             ->orderBy('priority_order')
             ->orderBy('name')
             ->get();
+        $checkoutDefaultAddress = null;
+        if ($checkoutCustomer) {
+            $checkoutDefaultAddress = DB::table('customer_addresses')
+                ->where('user_id', $checkoutCustomer->id)
+                ->orderByDesc('is_default')
+                ->orderByDesc('id')
+                ->first();
+        }
         $subtotal = 0;
 
-        return view('frontend.checkout', compact('cartItems', 'stores', 'subtotal'));
+        return view('frontend.checkout', compact(
+            'cartItems',
+            'stores',
+            'subtotal',
+            'checkoutPrefillName',
+            'checkoutPrefillPhone',
+            'checkoutPrefillEmail',
+            'checkoutLockContact',
+            'checkoutDefaultAddress'
+        ));
     }
 
     public function placeOrder(Request $request): JsonResponse
     {
-        $normalizedPhone = $this->normalizeVietnamPhone((string) $request->input('customer_phone', ''));
+        $authUser = Auth::user();
+        $checkoutCustomer = ($authUser && $authUser->role === 'customer') ? $authUser : null;
+
+        $accountPhone = $checkoutCustomer
+            ? $this->normalizeVietnamPhone((string) ($checkoutCustomer->phone ?? ''))
+            : '';
+        $accountEmail = $checkoutCustomer
+            ? $this->normalizeEmail((string) ($checkoutCustomer->email ?? ''))
+            : null;
+
+        $normalizedPhone = $accountPhone !== ''
+            ? $accountPhone
+            : $this->normalizeVietnamPhone((string) $request->input('customer_phone', ''));
+        $normalizedEmail = $accountEmail ?: $this->normalizeEmail((string) $request->input('customer_email', ''));
+
         $request->merge([
             'customer_name' => trim((string) $request->input('customer_name', '')),
             'customer_phone' => $normalizedPhone,
+            'customer_email' => $normalizedEmail,
+            'province_name' => trim((string) $request->input('province_name', '')),
+            'district_name' => trim((string) $request->input('district_name', '')),
+            'ward_name' => trim((string) $request->input('ward_name', '')),
+            'address_line' => trim((string) $request->input('address_line', '')),
             'shipping_address_text' => trim((string) $request->input('shipping_address_text', '')),
             'note' => trim((string) $request->input('note', '')),
             'payment_method' => trim((string) $request->input('payment_method', 'cod')),
@@ -1087,6 +1598,10 @@ class StorefrontController extends Controller
             'customer_phone' => ['required', 'string', 'regex:/^0(3|5|7|8|9)\d{8}$/'],
             'customer_email' => ['nullable', 'email', 'max:190'],
             'delivery_type' => ['required', 'in:delivery,pickup'],
+            'province_name' => ['nullable', 'string', 'max:120'],
+            'district_name' => ['nullable', 'string', 'max:120'],
+            'ward_name' => ['nullable', 'string', 'max:120'],
+            'address_line' => ['nullable', 'string', 'max:255'],
             'shipping_address_text' => ['nullable', 'string', 'min:10', 'max:500'],
             'store_id' => ['nullable', 'integer', 'exists:stores,id'],
             'payment_method' => ['required', 'in:cod,vietqr'],
@@ -1119,6 +1634,27 @@ class StorefrontController extends Controller
             ], 422);
         }
 
+        if (
+            $checkoutCustomer
+            && ($validated['delivery_type'] ?? 'delivery') === 'delivery'
+            && !blank($validated['address_line'] ?? null)
+            && !blank($validated['province_name'] ?? null)
+            && !blank($validated['district_name'] ?? null)
+            && !blank($validated['ward_name'] ?? null)
+        ) {
+            $this->upsertCustomerDefaultAddress(
+                $checkoutCustomer,
+                [
+                    'province' => trim((string) ($validated['province_name'] ?? '')),
+                    'district' => trim((string) ($validated['district_name'] ?? '')),
+                    'ward' => trim((string) ($validated['ward_name'] ?? '')),
+                    'address_line' => trim((string) ($validated['address_line'] ?? '')),
+                ],
+                trim((string) ($validated['customer_name'] ?? '')),
+                $validated['customer_phone'] ?? ''
+            );
+        }
+
         $requestedItems = collect($validated['items']);
         $products = Product::query()
             ->whereIn('id', $requestedItems->pluck('product_id')->map(fn ($id) => (int) $id)->unique()->all())
@@ -1139,6 +1675,8 @@ class StorefrontController extends Controller
         }
 
         $normalizedItems = $this->normalizeCheckoutItems($requestedItems, $products);
+        $orderUserId = $checkoutCustomer ? (int) $checkoutCustomer->id : null;
+        $validated['user_id'] = $orderUserId;
 
         if (($validated['payment_method'] ?? 'cod') === 'vietqr') {
             $existingPendingInvoice = $this->findActivePendingVietqrInvoiceByPhone($validated['customer_phone']);
@@ -1253,7 +1791,7 @@ class StorefrontController extends Controller
             $invoiceId = DB::table('payment_invoices')->insertGetId([
                 'invoice_code' => $invoiceCode,
                 'order_id' => null,
-                'user_id' => null,
+                'user_id' => !empty($validated['user_id']) ? (int) $validated['user_id'] : null,
                 'customer_name' => $validated['customer_name'],
                 'customer_phone' => $validated['customer_phone'],
                 'customer_email' => $validated['customer_email'] ?? null,
@@ -1297,7 +1835,7 @@ class StorefrontController extends Controller
             $orderId = DB::table('orders')->insertGetId([
                 'order_code' => $orderCode,
                 'customer_tracking_token' => Order::generateCustomerTrackingToken(),
-                'user_id' => null,
+                'user_id' => !empty($validated['user_id']) ? (int) $validated['user_id'] : null,
                 'customer_name' => $validated['customer_name'],
                 'customer_phone' => $validated['customer_phone'],
                 'customer_email' => $validated['customer_email'] ?? null,
@@ -1440,8 +1978,13 @@ class StorefrontController extends Controller
 
     public function orderTracking(string $token): View
     {
+        $normalizedToken = strtoupper(trim($token));
+        if (preg_match('/^[A-Z0-9]{10,24}$/', $normalizedToken) !== 1) {
+            abort(404);
+        }
+
         $order = Order::query()
-            ->where('customer_tracking_token', strtoupper(trim($token)))
+            ->where('customer_tracking_token', $normalizedToken)
             ->firstOrFail();
 
         $selectedStore = null;
@@ -1458,7 +2001,7 @@ class StorefrontController extends Controller
             ->whereIn('setting_key', ['site_name', 'site_logo_url', 'contact_phone', 'hotline', 'contact_address', 'zalo_url'])
             ->pluck('setting_value', 'setting_key');
 
-        $trackingLink = route('frontend.order-tracking', ['token' => $order->customer_tracking_token]);
+        $trackingLink = URL::temporarySignedRoute('frontend.order-tracking', now()->addDays(7), ['token' => $order->customer_tracking_token]);
         $qrRenderer = new ImageRenderer(
             new RendererStyle(180, 1),
             new SvgImageBackEnd()
@@ -2156,6 +2699,7 @@ class StorefrontController extends Controller
         })->values();
 
         $order = $this->createOrderRecord([
+            'user_id' => !empty($invoice->user_id) ? (int) $invoice->user_id : null,
             'customer_name' => $invoice->customer_name,
             'customer_phone' => $invoice->customer_phone,
             'customer_email' => $invoice->customer_email,

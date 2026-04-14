@@ -106,7 +106,7 @@
   @stack('vendor_styles')
   @stack('head')
 </head>
-<body>
+<body class="{{ trim($__env->yieldContent('body_class')) ?: 'promo-hidden' }}">
   @yield('content')
   @unless (request()->routeIs('frontend.search'))
     <livewire:frontend.search-page mode="overlay" />

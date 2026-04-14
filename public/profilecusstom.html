@@ -1,0 +1,184 @@
+
+
+đưa nó sang bootstrap
+ <!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary-container": "#cae5e0",
+                    "surface-container-high": "#e5e9e6",
+                    "secondary-fixed-dim": "#b1ccc7",
+                    "on-error": "#ffffff",
+                    "on-tertiary-fixed": "#390b00",
+                    "surface-container": "#ebefec",
+                    "primary-container": "#006b5e",
+                    "on-secondary": "#ffffff",
+                    "surface-container-lowest": "#ffffff",
+                    "tertiary": "#723521",
+                    "primary-fixed": "#9ff2e1",
+                    "on-error-container": "#93000a",
+                    "surface-variant": "#e0e3e1",
+                    "on-secondary-container": "#4e6763",
+                    "on-primary": "#ffffff",
+                    "on-tertiary": "#ffffff",
+                    "on-surface": "#181c1b",
+                    "outline-variant": "#bec9c5",
+                    "secondary-fixed": "#cde8e3",
+                    "surface-dim": "#d7dbd8",
+                    "primary": "#005147",
+                    "inverse-surface": "#2d3130",
+                    "on-tertiary-container": "#ffcebf",
+                    "inverse-primary": "#83d5c5",
+                    "on-background": "#181c1b",
+                    "surface-container-low": "#f1f4f2",
+                    "surface-bright": "#f7faf8",
+                    "surface": "#f7faf8",
+                    "surface-container-highest": "#e0e3e1",
+                    "on-primary-fixed": "#00201b",
+                    "tertiary-fixed": "#ffdbd0",
+                    "background": "#f7faf8",
+                    "on-primary-container": "#95e8d8",
+                    "error": "#ba1a1a",
+                    "secondary": "#4a635f",
+                    "on-primary-fixed-variant": "#005046",
+                    "on-secondary-fixed-variant": "#334b48",
+                    "tertiary-fixed-dim": "#ffb59e",
+                    "surface-tint": "#006b5e",
+                    "inverse-on-surface": "#eef1ef",
+                    "tertiary-container": "#8f4c36",
+                    "on-tertiary-fixed-variant": "#723521",
+                    "outline": "#6e7976",
+                    "error-container": "#ffdad6",
+                    "on-secondary-fixed": "#061f1d",
+                    "primary-fixed-dim": "#83d5c5",
+                    "on-surface-variant": "#3e4946"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Manrope"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        .tonal-transition {
+            background: linear-gradient(180deg, #f7faf8 0%, #f1f4f2 100%);
+        }
+        .glass-nav {
+            background: rgba(247, 250, 248, 0.8);
+            backdrop-filter: blur(20px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-surface font-body text-on-surface min-h-screen pb-24">
+<!-- TopAppBar Section -->
+<header class="w-full sticky top-0 z-50 bg-[#f7faf8] dark:bg-[#181c1b]">
+<div class="flex items-center justify-between px-6 py-4 w-full max-w-xl mx-auto">
+<div class="flex items-center gap-4">
+<button class="text-[#005147] dark:text-[#cae5e0] hover:bg-[#f1f4f2] dark:hover:bg-[#1f2624] transition-colors active:scale-95 duration-150 ease-in-out p-2 rounded-full">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<h1 class="font-manrope text-lg font-bold tracking-tight text-[#005147] dark:text-[#cae5e0]">Profile</h1>
+</div>
+<button class="text-[#005147] dark:text-[#cae5e0] hover:bg-[#f1f4f2] dark:hover:bg-[#1f2624] transition-colors p-2 rounded-full">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+</div>
+</header>
+<main class="max-w-xl mx-auto px-6 pt-8 space-y-10">
+<!-- User Identity Section -->
+<section class="flex flex-col items-center text-center">
+<div class="relative mb-6">
+<div class="w-32 h-32 rounded-full p-1 bg-gradient-to-tr from-primary to-secondary-container">
+<img alt="User profile" class="w-full h-full object-cover rounded-full border-4 border-surface" data-alt="Sophisticated portrait of a professional woman with soft lighting, emerald green studio background, high fashion aesthetic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAgJAy-hCw8uVIrpKsDCQv3OUnQ-JR7XPocHcU48ExJL6c1H-9ZoIBy8p8M_TNbT_cr4iDYA2273seCDP91SnMC2Rz4XOl1vbvDj2r90iPb30VqRtS3t61JZyhgxw-fQHfWrTWABlH2rIcRY9s92zM8h8ad_kgvNSJsNfIuVX0ud9Do0nwRmMU1-OTYH4-OXeJsr6TOdFxj7LSG_E8CWAxNiqJq3KZj6sAic5T0yXCvb1TT_l8Rq0jGEg5HQ48T4hn4dIQQ4Iyxrs0"/>
+</div>
+<div class="absolute bottom-1 right-1 bg-primary text-white p-2 rounded-full shadow-lg border-2 border-surface">
+<span class="material-symbols-outlined text-sm" data-icon="verified" style='font-variation-settings: "FILL" 1;'>verified</span>
+</div>
+</div>
+<h2 class="font-headline text-3xl font-extrabold text-on-surface tracking-tight">Thanh Huyền</h2>
+<p class="font-body text-on-surface-variant text-sm mt-1">Premium Member • Joined 2023</p>
+</section>
+<!-- Stats Bento Grid (High-end UI Pattern) -->
+<section class="grid grid-cols-2 gap-4">
+<div class="bg-surface-container-low p-5 rounded-xl flex flex-col justify-between h-32">
+<span class="material-symbols-outlined text-primary" data-icon="account_balance_wallet">account_balance_wallet</span>
+<div>
+<p class="text-xs font-label text-on-surface-variant uppercase tracking-wider">Số dư</p>
+<p class="font-headline text-xl font-bold text-primary">2.450.000đ</p>
+</div>
+</div>
+<div class="bg-primary text-white p-5 rounded-xl flex flex-col justify-between h-32 shadow-xl shadow-primary/10">
+<span class="material-symbols-outlined" data-icon="stars" style='font-variation-settings: "FILL" 1;'>stars</span>
+<div>
+<p class="text-xs font-label text-on-primary-container uppercase tracking-wider">Điểm thưởng</p>
+<p class="font-headline text-xl font-bold">1,240 pts</p>
+</div>
+</div>
+</section>
+<!-- Menu Section (Simplified structure) -->
+<section class="space-y-1 bg-white rounded-2xl shadow-sm overflow-hidden">
+<!-- Item 1 -->
+<a class="flex items-center justify-between p-5 hover:bg-surface-container-low rounded-2xl transition-colors duration-200 active:scale-[0.98] hover:bg-gray-50 border-b border-gray-100 last:border-b-0" href="#">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary" data-icon="person">person</span>
+<p class="font-headline font-bold text-on-surface">Thông tin cá nhân</p>
+</div>
+<span class="material-symbols-outlined text-outline-variant text-sm" data-icon="chevron_right">chevron_right</span>
+</a>
+<!-- Item 2 -->
+<!-- Item 3 -->
+<a class="flex items-center justify-between p-5 hover:bg-surface-container-low rounded-2xl transition-colors duration-200 active:scale-[0.98] hover:bg-gray-50 border-b border-gray-100 last:border-b-0" href="#">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary" data-icon="monitoring">monitoring</span>
+<p class="font-headline font-bold text-on-surface">Thống kê chi tiêu</p>
+</div>
+<span class="material-symbols-outlined text-outline-variant text-sm" data-icon="chevron_right">chevron_right</span>
+</a>
+<!-- Item 4 -->
+<a class="flex items-center justify-between p-5 hover:bg-surface-container-low rounded-2xl transition-colors duration-200 active:scale-[0.98] hover:bg-gray-50 border-b border-gray-100 last:border-b-0" href="#">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary" data-icon="history">history</span>
+<p class="font-headline font-bold text-on-surface">Lịch sử mua hàng</p>
+</div>
+<span class="material-symbols-outlined text-outline-variant text-sm" data-icon="chevron_right">chevron_right</span>
+</a>
+</section>
+<!-- Danger Zone -->
+<section class="pt-4 pb-12">
+<button class="w-full flex items-center justify-center gap-2 p-4 rounded-full font-headline font-bold transition-all active:scale-95 text-white" style="background-color: #252c2c;">
+<span class="material-symbols-outlined text-lg" data-icon="logout">logout</span>
+                Đăng xuất
+            </button>
+</section>
+</main>
+<!-- BottomNavBar Section -->
+
+</body></html>
+

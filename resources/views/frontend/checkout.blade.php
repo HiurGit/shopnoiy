@@ -21,16 +21,17 @@
     ? $defaultPaymentMethod
     : ($availablePaymentMethods->first() ?? 'cod');
   $paymentCheckoutNote = trim((string) ($paymentSettings['checkout_note'] ?? ''));
+  $checkoutDefaultAddressPayload = [
+    'province' => (string) data_get($checkoutDefaultAddress ?? null, 'province', ''),
+    'district' => (string) data_get($checkoutDefaultAddress ?? null, 'district', ''),
+    'ward' => (string) data_get($checkoutDefaultAddress ?? null, 'ward', ''),
+    'address_line' => (string) data_get($checkoutDefaultAddress ?? null, 'address_line', ''),
+  ];
 @endphp
 <main class="phone checkout-phone">
-  <header class="cart-topbar">
-    @include('frontend.partials.logo')
-    <div class="actions">
-      <i class="bi bi-search"></i>
-      <a href="{{ route('frontend.cart') }}" class="bell-wrap" aria-label="Mở giỏ hàng"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" data-slot="icon" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"></path></svg></a>
-      <i class="bi bi-person-circle"></i>
-    </div>
-  </header>
+  @include('frontend.partials.topbar', [
+    'headerClass' => 'topbar',
+  ])
 
   <section class="cart-subhead">
     <a href="{{ route('frontend.cart') }}" class="cart-subhead-back" aria-label="Quay lại" data-history-back="true">
@@ -44,7 +45,8 @@
     <section class="checkout-page">
       <p class="checkout-customer-note">
         - Vui lòng nhập đúng SĐT để gọi nhận hàng.<br>
-        - Mail không bắt buộc nhưng nếu nhập đúng mail bạn sẽ nhận được mail theo dõi đơn hàng.
+        - Mail không bắt buộc nhưng nếu nhập đúng mail bạn sẽ nhận được mail theo dõi đơn hàng.<br>
+        - Bạn có thể <a href="{{ route('frontend.login') }}" class="checkout-login-link">Đăng nhập</a> để làm thành viên của shop sẽ được hỗ trợ tốt hơn.
       </p>
 
       <div class="checkout-tabs">
@@ -58,13 +60,43 @@
       </div>
 
       <div class="checkout-row two-cols">
-        <input type="text" name="customer_name" value="" placeholder="Nhập tên khách hàng" data-checkout-name autocomplete="name" maxlength="150" />
-        <input type="tel" name="customer_phone" value="" placeholder="Nhập số điện thoại" data-checkout-phone inputmode="tel" autocomplete="tel" maxlength="15" />
+        <input
+          type="text"
+          name="customer_name"
+          value="{{ $checkoutPrefillName ?? '' }}"
+          placeholder="Nhập tên khách hàng"
+          data-checkout-name
+          autocomplete="name"
+          maxlength="150"
+        />
+        <input
+          type="tel"
+          name="customer_phone"
+          value="{{ $checkoutPrefillPhone ?? '' }}"
+          placeholder="Nhập số điện thoại"
+          data-checkout-phone
+          inputmode="tel"
+          autocomplete="tel"
+          maxlength="15"
+          {{ !empty($checkoutLockContact) ? 'readonly' : '' }}
+        />
       </div>
 
       <div class="checkout-row">
-        <input type="email" name="customer_email" value="" placeholder="Nhập email để có thể theo dõi đơn hàng" data-checkout-email autocomplete="email" maxlength="190" />
+        <input
+          type="email"
+          name="customer_email"
+          value="{{ $checkoutPrefillEmail ?? '' }}"
+          placeholder="Nhập email để có thể theo dõi đơn hàng"
+          data-checkout-email
+          autocomplete="email"
+          maxlength="190"
+          {{ !empty($checkoutLockContact) ? 'readonly' : '' }}
+        />
       </div>
+      @if (!empty($checkoutLockContact))
+        <p class="checkout-account-note">Đang dùng thông tin tài khoản</p>
+      @endif
 
       <div class="checkout-row checkout-delivery-row">
         <select class="checkout-select" name="address_level1" data-checkout-province autocomplete="address-level1">
@@ -85,7 +117,15 @@
       </div>
 
       <div class="checkout-row checkout-delivery-row">
-        <input type="text" name="street_address" value="" placeholder="Số nhà, tên đường..." data-checkout-address-line autocomplete="street-address" maxlength="255" />
+        <input
+          type="text"
+          name="street_address"
+          value="{{ (string) data_get($checkoutDefaultAddress, 'address_line', '') }}"
+          placeholder="Số nhà, tên đường..."
+          data-checkout-address-line
+          autocomplete="street-address"
+          maxlength="255"
+        />
       </div>
 
       <div class="checkout-row checkout-pickup-row" hidden>
@@ -192,6 +232,24 @@
     line-height: 1.5;
   }
 
+  .checkout-login-link {
+    color: #0f5a4d;
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .checkout-account-note {
+    margin: -4px 0 12px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: #e8f6f2;
+    border: 1px solid #cdebe2;
+    color: #0f5a4d;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
   .checkout-popup {
     position: fixed;
     inset: 0;
@@ -273,6 +331,10 @@
 <script>
   (() => {
     const defaultPaymentMethod = @json($defaultPaymentMethod);
+    const checkoutLockContact = @json((bool) ($checkoutLockContact ?? false));
+    const checkoutAuthPhone = @json((string) ($checkoutPrefillPhone ?? ''));
+    const checkoutAuthEmail = @json((string) ($checkoutPrefillEmail ?? ''));
+    const checkoutDefaultAddress = @json($checkoutDefaultAddressPayload);
     const cartUrl = @json(route('frontend.cart'));
     const checkoutStorageKey = 'shopnoiy:checkout-profile:v1';
     const vietqrResumeStorageKey = 'shopnoiy:vietqr-pending:v1';
@@ -496,16 +558,18 @@
         checkoutName.value = savedProfile.customer_name;
       }
 
-      if (checkoutPhone && savedProfile.customer_phone) {
+      if (!checkoutLockContact && checkoutPhone && savedProfile.customer_phone) {
         checkoutPhone.value = normalizeVietnamPhone(savedProfile.customer_phone);
       }
 
-      if (checkoutEmail && savedProfile.customer_email) {
+      if (!checkoutLockContact && checkoutEmail && savedProfile.customer_email) {
         checkoutEmail.value = String(savedProfile.customer_email).trim();
       }
 
       if (checkoutAddressLine && savedProfile.address_line) {
         checkoutAddressLine.value = savedProfile.address_line;
+      } else if (checkoutAddressLine && checkoutDefaultAddress.address_line) {
+        checkoutAddressLine.value = String(checkoutDefaultAddress.address_line).trim();
       }
 
       if (checkoutNote && savedProfile.note) {
@@ -538,6 +602,20 @@
       }
     };
 
+    const enforceAccountContact = () => {
+      if (!checkoutLockContact) {
+        return;
+      }
+
+      if (checkoutPhone) {
+        checkoutPhone.value = normalizeVietnamPhone(checkoutAuthPhone || checkoutPhone.value || '');
+      }
+
+      if (checkoutEmail) {
+        checkoutEmail.value = String(checkoutAuthEmail || '').trim();
+      }
+    };
+
     const restoreAddressSelections = () => {
       if (!restoredCheckoutProfile) {
         return;
@@ -546,9 +624,17 @@
       const provinceCode = String(restoredCheckoutProfile.province_code || '');
       const districtCode = String(restoredCheckoutProfile.district_code || '');
       const wardCode = String(restoredCheckoutProfile.ward_code || '');
+      const profileProvinceName = String(checkoutDefaultAddress.province || '').trim();
+      const profileDistrictName = String(checkoutDefaultAddress.district || '').trim();
+      const profileWardName = String(checkoutDefaultAddress.ward || '').trim();
 
       if (checkoutProvince && provinceCode !== '') {
         checkoutProvince.value = provinceCode;
+      } else if (checkoutProvince && profileProvinceName !== '') {
+        const matchProvince = checkoutAddressData.find((item) => String(item.name || '').trim().toLowerCase() === profileProvinceName.toLowerCase());
+        if (matchProvince) {
+          checkoutProvince.value = String(matchProvince.code);
+        }
       }
 
       const province = getSelectedProvince();
@@ -556,6 +642,11 @@
 
       if (checkoutDistrict && districtCode !== '') {
         checkoutDistrict.value = districtCode;
+      } else if (checkoutDistrict && profileDistrictName !== '') {
+        const matchDistrict = (province?.districts || []).find((item) => String(item.name || '').trim().toLowerCase() === profileDistrictName.toLowerCase());
+        if (matchDistrict) {
+          checkoutDistrict.value = String(matchDistrict.code);
+        }
       }
 
       const district = getSelectedDistrict();
@@ -563,6 +654,11 @@
 
       if (checkoutWard && wardCode !== '') {
         checkoutWard.value = wardCode;
+      } else if (checkoutWard && profileWardName !== '') {
+        const matchWard = (district?.wards || []).find((item) => String(item.name || '').trim().toLowerCase() === profileWardName.toLowerCase());
+        if (matchWard) {
+          checkoutWard.value = String(matchWard.code);
+        }
       }
     };
 
@@ -583,6 +679,11 @@
         }
 
         checkoutAddressData = await response.json();
+        checkoutAddressData = [...checkoutAddressData].sort((a, b) => {
+          const nameA = String(a?.name || '').trim();
+          const nameB = String(b?.name || '').trim();
+          return nameA.localeCompare(nameB, 'vi', { sensitivity: 'base', numeric: true });
+        });
         fillSelectOptions(checkoutProvince, checkoutAddressData, 'Chọn tỉnh / thành phố');
         restoreAddressSelections();
       } catch (error) {
@@ -725,6 +826,7 @@
     });
 
     restoreCheckoutProfile();
+    enforceAccountContact();
     syncPaymentCards();
     trackCheckoutActivity('Đang nhập thông tin thanh toán');
 
@@ -848,6 +950,10 @@
               customer_name: customerName,
               customer_phone: customerPhone,
               customer_email: customerEmail || null,
+              province_name: selectedProvince?.name || null,
+              district_name: selectedDistrict?.name || null,
+              ward_name: selectedWard?.name || null,
+              address_line: addressLine || null,
               delivery_type: deliveryType,
               shipping_address_text: deliveryType === 'delivery' ? shippingAddress : null,
               store_id: deliveryType === 'pickup' ? (checkoutStoreSelect?.value || null) : null,

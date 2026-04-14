@@ -45,6 +45,23 @@ Route::get('/san-pham/{slug?}', [StorefrontController::class, 'productDetail'])-
 Route::get('/san-pham-config/{product}', [StorefrontController::class, 'productConfig'])->name('frontend.product-config');
 Route::get('/gio-hang', [StorefrontController::class, 'cart'])->name('frontend.cart');
 Route::get('/thanh-toan', [StorefrontController::class, 'checkout'])->name('frontend.checkout');
+Route::get('/dang-nhap', [StorefrontController::class, 'showCustomerLoginForm'])->name('frontend.login');
+Route::post('/dang-nhap', [StorefrontController::class, 'customerLogin'])->name('frontend.login.submit');
+Route::get('/dang-ky', [StorefrontController::class, 'showCustomerRegisterForm'])->name('frontend.register');
+Route::post('/dang-ky', [StorefrontController::class, 'customerRegister'])->name('frontend.register.submit');
+Route::get('/quen-mat-khau', [StorefrontController::class, 'showCustomerForgotPasswordForm'])->name('frontend.password.forgot');
+Route::post('/quen-mat-khau', [StorefrontController::class, 'customerForgotPassword'])->name('frontend.password.forgot.submit');
+Route::middleware('customer.auth')->group(function () {
+    Route::get('/tai-khoan', [StorefrontController::class, 'customerProfile'])->name('frontend.profile');
+    Route::get('/tai-khoan/lich-su-mua-hang', [StorefrontController::class, 'customerOrderHistory'])->name('frontend.profile.orders');
+    Route::get('/tai-khoan/lich-su-mua-hang/{order}', [StorefrontController::class, 'customerOrderDetail'])->name('frontend.profile.orders.detail');
+    Route::post('/tai-khoan/thong-tin', [StorefrontController::class, 'customerUpdateProfileInfo'])->name('frontend.profile.info.update');
+    Route::post('/tai-khoan/dia-chi', [StorefrontController::class, 'customerUpdateAddress'])->name('frontend.profile.address.update');
+    Route::post('/tai-khoan/avatar', [StorefrontController::class, 'customerUpdateAvatar'])->name('frontend.profile.avatar.update');
+    Route::get('/doi-mat-khau', [StorefrontController::class, 'showCustomerChangePasswordForm'])->name('frontend.password.change');
+    Route::post('/doi-mat-khau', [StorefrontController::class, 'customerChangePassword'])->name('frontend.password.change.submit');
+    Route::post('/dang-xuat', [StorefrontController::class, 'customerLogout'])->name('frontend.logout');
+});
 Route::middleware('throttle:place-order')->post('/dat-hang', [StorefrontController::class, 'placeOrder'])->name('frontend.place-order');
 Route::middleware('signed')->get('/thanh-toan-vietqr/{invoice}', [StorefrontController::class, 'vietqrPaymentPage'])->name('frontend.vietqr.payment');
 Route::middleware('signed')->get('/thanh-toan-vietqr/{invoice}/trang-thai', [StorefrontController::class, 'vietqrPaymentStatus'])->name('frontend.vietqr.payment-status');
@@ -52,7 +69,7 @@ Route::middleware('signed')->get('/thanh-toan-vietqr/{invoice}/tai-qr', [Storefr
 Route::middleware('signed')->post('/thanh-toan-vietqr/{invoice}/huy', [StorefrontController::class, 'vietqrPaymentCancel'])->name('frontend.vietqr.payment-cancel');
 Route::post('/thanh-toan/vietqr/sepay-webhook', [StorefrontController::class, 'sepayWebhook'])->name('frontend.vietqr.sepay-webhook');
 Route::middleware('signed')->get('/dat-hang-thanh-cong/{order}', [StorefrontController::class, 'orderSuccess'])->name('frontend.order-success');
-Route::get('/o/{token}', [StorefrontController::class, 'orderTracking'])->name('frontend.order-tracking');
+Route::middleware(['signed', 'throttle:20,1'])->get('/o/{token}', [StorefrontController::class, 'orderTracking'])->name('frontend.order-tracking');
 Route::post('/theo-doi-khach', [VisitorTrackingController::class, 'store'])->name('frontend.visitor-tracking');
 
 Route::get('/thaodepzai/login', [AuthController::class, 'showLoginForm'])->name('backend.login');

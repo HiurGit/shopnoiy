@@ -226,7 +226,9 @@
                     <td>
                       @php
                         $trackingToken = $order->customer_tracking_token ?: '-';
-                        $trackingUrl = $order->customer_tracking_token ? route('frontend.order-tracking', ['token' => $order->customer_tracking_token]) : null;
+                        $trackingUrl = $order->customer_tracking_token
+                            ? \Illuminate\Support\Facades\URL::temporarySignedRoute('frontend.order-tracking', now()->addDays(7), ['token' => $order->customer_tracking_token])
+                            : null;
                       @endphp
                       <div class="tracking-link-box">
                          

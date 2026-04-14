@@ -10,6 +10,8 @@ class Order extends Model
 {
     use HasFactory;
 
+    private const CUSTOMER_TRACKING_TOKEN_LENGTH = 24;
+
     protected $fillable = [
         'order_code',
         'customer_tracking_token',
@@ -59,7 +61,7 @@ class Order extends Model
     public static function generateCustomerTrackingToken(): string
     {
         do {
-            $token = strtoupper(Str::random(10));
+            $token = strtoupper(Str::random(self::CUSTOMER_TRACKING_TOKEN_LENGTH));
         } while (static::query()->where('customer_tracking_token', $token)->exists());
 
         return $token;

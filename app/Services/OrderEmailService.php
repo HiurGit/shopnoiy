@@ -135,7 +135,7 @@ class OrderEmailService
         $zaloUrl = trim((string) ($settings['zalo_url'] ?? ''));
         $zaloGroupUrl = trim((string) ($settings['zalo_group_url'] ?? ''));
         $logoUrl = $this->resolveImageUrl((string) ($settings['site_logo_url'] ?? ''), '');
-        $trackingUrl = route('frontend.order-tracking', ['token' => $order->customer_tracking_token]);
+        $trackingUrl = URL::temporarySignedRoute('frontend.order-tracking', now()->addDays(7), ['token' => $order->customer_tracking_token]);
         $orderSuccessUrl = URL::signedRoute('frontend.order-success', ['order' => $order->id]);
 
         $deliveryLabel = $order->delivery_type === 'pickup'
