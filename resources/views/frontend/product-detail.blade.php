@@ -137,6 +137,14 @@
         <p class="pd-choice-value" data-choice-display="color">Chưa chọn màu</p>
         <div class="pd-colors">
           @forelse ($product->colors as $color)
+            @php
+              $colorImageUrl = trim((string) ($color->pivot->image_url ?? ''));
+              $colorImageUrl = $colorImageUrl !== ''
+                ? ((str_starts_with($colorImageUrl, 'http://') || str_starts_with($colorImageUrl, 'https://'))
+                    ? $colorImageUrl
+                    : asset(ltrim($colorImageUrl, '/')))
+                : '';
+            @endphp
             <button
               type="button"
               class="pd-color"
@@ -145,7 +153,15 @@
               aria-pressed="false"
               data-option-group="color"
               data-option-value="{{ $color->name }}"
-            ></button>
+              data-color-image="{{ $colorImageUrl }}"
+            >
+              <span
+                class="pd-color-chip{{ $colorImageUrl !== '' ? ' has-image' : '' }}"
+                @if ($colorImageUrl !== '')
+                  style="background-image:url('{{ $colorImageUrl }}')"
+                @endif
+              ></span>
+            </button>
           @empty
             <span>Đang cập nhật</span>
           @endforelse

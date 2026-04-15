@@ -1645,6 +1645,10 @@ class StorefrontController extends Controller
                 'id' => $color->id,
                 'name' => $color->name,
                 'hex_code' => $color->hex_code ?: '#cccccc',
+                'image_url' => $this->resolveImageUrl(
+                    $color->pivot->image_url ?? '',
+                    ''
+                ),
             ])->values(),
             'sizes' => $product->sizes->map(fn ($size) => [
                 'id' => $size->id,

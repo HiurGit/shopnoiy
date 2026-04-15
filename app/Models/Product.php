@@ -35,7 +35,9 @@ class Product extends Model
 
     public function colors()
     {
-        return $this->belongsToMany(ProductColor::class, 'product_color_map', 'product_id', 'color_id')->withTimestamps();
+        return $this->belongsToMany(ProductColor::class, 'product_color_map', 'product_id', 'color_id')
+            ->withPivot('image_url')
+            ->withTimestamps();
     }
 
     public function sizes()

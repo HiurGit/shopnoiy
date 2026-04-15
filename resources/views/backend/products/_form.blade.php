@@ -2,6 +2,7 @@
   $selectedColorIds = old('color_ids', isset($product) ? $product->colors->pluck('id')->all() : []);
   $selectedSizeIds = old('size_ids', isset($product) ? $product->sizes->pluck('id')->all() : []);
   $selectedTagIds = old('tag_ids', isset($product) ? $product->tags->pluck('id')->all() : []);
+  $selectedColorImageMap = old('color_image_map', $colorImageMap ?? []);
   $priceValue = old('price', isset($product) ? (string) $product->price : '0');
 
   if (is_numeric($priceValue)) {
@@ -68,6 +69,39 @@
         <option value="{{ $size->id }}" {{ in_array($size->id, $selectedSizeIds) ? 'selected' : '' }}>{{ $size->name }}</option>
       @endforeach
     </select>
+  </div>
+  <div class="col-md-12">
+    <label class="form-label">Anh dai dien theo mau (dung anh san pham ben duoi)</label>
+    <div class="small text-secondary mb-2">Chon mau o tren truoc, sau do gan anh tuong ung cho tung mau. Chi nhan anh da co trong san pham nay.</div>
+    <div class="row g-2 js-color-image-map-wrap">
+      @foreach ($colors as $color)
+        @php
+          $isSelectedColor = in_array($color->id, $selectedColorIds);
+          $selectedImageUrl = trim((string) ($selectedColorImageMap[$color->id] ?? ''));
+          $selectedPreviewUrl = $selectedImageUrl !== ''
+            ? ((str_starts_with($selectedImageUrl, 'http://') || str_starts_with($selectedImageUrl, 'https://'))
+                ? $selectedImageUrl
+                : asset(ltrim($selectedImageUrl, '/')))
+            : '';
+        @endphp
+        <div class="col-md-4 js-color-image-map-item{{ $isSelectedColor ? '' : ' d-none' }}" data-color-id="{{ $color->id }}">
+          <div class="border rounded p-2 h-100 bg-light-subtle">
+            <div class="fw-semibold small mb-2">{{ $color->name }}</div>
+            <select name="color_image_map[{{ $color->id }}]" class="form-select form-select-sm js-color-image-select" data-color-id="{{ $color->id }}">
+              <option value="">-- Khong gan anh rieng --</option>
+              @foreach ($productImages as $img)
+                <option value="{{ $img->image_url }}" {{ $selectedImageUrl !== '' && $selectedImageUrl === (string) $img->image_url ? 'selected' : '' }}>
+                  Anh #{{ $loop->iteration }}{{ $img->is_primary ? ' (anh chinh)' : '' }}
+                </option>
+              @endforeach
+            </select>
+            <div class="mt-2 ratio ratio-1x1 bg-white rounded overflow-hidden border js-color-image-preview{{ $selectedPreviewUrl === '' ? ' d-none' : '' }}" data-color-preview="{{ $color->id }}">
+              <img src="{{ $selectedPreviewUrl }}" alt="{{ $color->name }}" class="w-100 h-100 object-fit-cover">
+            </div>
+          </div>
+        </div>
+      @endforeach
+    </div>
   </div>
   <div class="col-md-6">
     <label class="form-label">Tag sản phẩm (chọn nhiều)</label>
@@ -305,6 +339,162 @@
           applyFilter();
         });
 
+        document.querySelectorAll('form').forEach(function (form) {
+          const colorSelect = form.querySelector('select[name="color_ids[]"]');
+          const mapWrap = form.querySelector('.js-color-image-map-wrap');
+
+          if (!colorSelect || !mapWrap) {
+            return;
+          }
+
+          const colorItems = Array.from(mapWrap.querySelectorAll('.js-color-image-map-item'));
+          const colorImageSelects = Array.from(mapWrap.querySelectorAll('.js-color-image-select'));
+          let selectedNewUploadFiles = [];
+
+          const getSelectedColorIds = function () {
+            return Array.from(colorSelect.options || [])
+              .filter(function (option) {
+                return option.selected;
+              })
+              .map(function (option) {
+                return String(option.value || '');
+              })
+              .filter(Boolean);
+          };
+
+          const syncVisibleColorRows = function () {
+            const selectedIds = getSelectedColorIds();
+            const selectedLookup = new Set(selectedIds);
+
+            colorItems.forEach(function (item) {
+              const colorId = String(item.dataset.colorId || '');
+              const isVisible = selectedLookup.has(colorId);
+              item.classList.toggle('d-none', !isVisible);
+
+              const select = item.querySelector('.js-color-image-select');
+              if (!isVisible && select) {
+                select.value = '';
+                const preview = item.querySelector('.js-color-image-preview');
+                if (preview) {
+                  preview.classList.add('d-none');
+                  const previewImg = preview.querySelector('img');
+                  if (previewImg) {
+                    previewImg.src = '';
+                  }
+                }
+              }
+            });
+          };
+
+          const syncColorImagePreview = function (selectElement) {
+            const select = selectElement;
+            if (!select) {
+              return;
+            }
+
+            const colorId = String(select.dataset.colorId || '');
+            const preview = mapWrap.querySelector('[data-color-preview="' + colorId + '"]');
+            if (!preview) {
+              return;
+            }
+
+            const selectedUrl = String(select.value || '').trim();
+            const previewImg = preview.querySelector('img');
+            if (!previewImg) {
+              return;
+            }
+
+            if (previewImg.dataset.tempObjectUrl) {
+              URL.revokeObjectURL(previewImg.dataset.tempObjectUrl);
+              delete previewImg.dataset.tempObjectUrl;
+            }
+
+            if (selectedUrl === '') {
+              preview.classList.add('d-none');
+              previewImg.src = '';
+              return;
+            }
+
+            if (selectedUrl.startsWith('__new__:')) {
+              const selectedIndex = Number((selectedUrl.split(':')[1] || '').trim());
+              const selectedFile = Number.isInteger(selectedIndex) && selectedIndex >= 0
+                ? (selectedNewUploadFiles[selectedIndex] || null)
+                : null;
+
+              if (!selectedFile) {
+                preview.classList.add('d-none');
+                previewImg.src = '';
+                return;
+              }
+
+              const objectUrl = URL.createObjectURL(selectedFile);
+              preview.classList.remove('d-none');
+              previewImg.src = objectUrl;
+              previewImg.dataset.tempObjectUrl = objectUrl;
+              return;
+            }
+
+            preview.classList.remove('d-none');
+            previewImg.src = selectedUrl.startsWith('http://') || selectedUrl.startsWith('https://')
+              ? selectedUrl
+              : (window.location.origin + (selectedUrl.startsWith('/') ? selectedUrl : ('/' + selectedUrl)));
+          };
+
+          const syncColorImageSelectOptions = function (nextFiles) {
+            selectedNewUploadFiles = Array.isArray(nextFiles) ? nextFiles.slice() : [];
+
+            colorImageSelects.forEach(function (select) {
+              const currentValue = String(select.value || '');
+
+              Array.from(select.querySelectorAll('option[data-new-upload-option="1"]')).forEach(function (option) {
+                option.remove();
+              });
+
+              selectedNewUploadFiles.forEach(function (file, index) {
+                const option = document.createElement('option');
+                option.value = '__new__:' + index;
+                option.setAttribute('data-new-upload-option', '1');
+                option.textContent = 'Anh moi #' + (index + 1) + ' - ' + (file && file.name ? file.name : 'image');
+                select.appendChild(option);
+              });
+
+              const hasCurrentValue = Array.from(select.options).some(function (option) {
+                return String(option.value || '') === currentValue;
+              });
+
+              if (hasCurrentValue) {
+                select.value = currentValue;
+              } else if (currentValue.startsWith('__new__:')) {
+                select.value = '';
+              }
+
+              syncColorImagePreview(select);
+            });
+          };
+
+          form.addEventListener('shopnoiy:product-images-updated', function (event) {
+            const files = event && event.detail && Array.isArray(event.detail.files)
+              ? event.detail.files
+              : [];
+            syncColorImageSelectOptions(files);
+          });
+
+          colorImageSelects.forEach(function (select) {
+            select.addEventListener('change', function () {
+              syncColorImagePreview(select);
+            });
+            syncColorImagePreview(select);
+          });
+
+          colorSelect.addEventListener('change', syncVisibleColorRows);
+          if (typeof window.jQuery !== 'undefined') {
+            window.jQuery(colorSelect).on('change.select2_color_map', syncVisibleColorRows);
+          }
+          syncVisibleColorRows();
+
+          form.__shopNoiySyncColorImageSelectOptions = syncColorImageSelectOptions;
+        });
+
         document.querySelectorAll('.js-existing-product-images').forEach(function (container) {
           let draggingItem = null;
 
@@ -477,6 +667,11 @@
           function renderPreview() {
             preview.innerHTML = '';
             updateStatus();
+            form.dispatchEvent(new CustomEvent('shopnoiy:product-images-updated', {
+              detail: {
+                files: selectedFiles
+              }
+            }));
 
             if (selectedFiles.length === 0) {
               return;

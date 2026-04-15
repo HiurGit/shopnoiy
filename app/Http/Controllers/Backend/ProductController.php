@@ -78,8 +78,9 @@ class ProductController extends Controller
         $sizes = ProductSize::query()->orderBy('sort_order')->orderBy('name')->get();
         $tags = ProductTag::query()->orderBy('sort_order')->orderBy('name')->get();
         $productImages = collect();
+        $colorImageMap = [];
 
-        return view('backend.products.create', compact('categories', 'colors', 'sizes', 'tags', 'productImages'));
+        return view('backend.products.create', compact('categories', 'colors', 'sizes', 'tags', 'productImages', 'colorImageMap'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -87,6 +88,8 @@ class ProductController extends Controller
         $request->validate([
             'images' => ['nullable', 'array'],
             'images.*' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,gif', 'max:5120'],
+            'color_image_map' => ['nullable', 'array'],
+            'color_image_map.*' => ['nullable', 'string', 'max:500'],
         ]);
 
         $name = trim((string) $request->input('name', ''));
@@ -116,11 +119,12 @@ class ProductController extends Controller
             'sold_count' => (int) $request->input('sold_count', 0),
         ]);
 
-        $product->colors()->sync($this->normalizeIds($request->input('color_ids', [])));
+        $colorIds = $this->normalizeIds($request->input('color_ids', []));
         $product->sizes()->sync($this->normalizeIds($request->input('size_ids', [])));
         $product->tags()->sync($this->normalizeIds($request->input('tag_ids', [])));
         $this->storeUploadedImages($request, $product->id);
         $this->ensurePrimaryImage($product->id);
+        $product->colors()->sync($this->buildColorSyncPayload($product->id, $colorIds, $request->input('color_image_map', [])));
 
         return redirect()->route('backend.products')->with('success', 'Đã tạo sản phẩm.');
     }
@@ -142,8 +146,14 @@ class ProductController extends Controller
         $sizes = ProductSize::query()->orderBy('sort_order')->orderBy('name')->get();
         $tags = ProductTag::query()->orderBy('sort_order')->orderBy('name')->get();
         $productImages = DB::table('product_images')->where('product_id', $product->id)->orderBy('sort_order')->get();
+        $colorImageMap = DB::table('product_color_map')
+            ->where('product_id', $product->id)
+            ->pluck('image_url', 'color_id')
+            ->mapWithKeys(fn ($url, $colorId) => [(int) $colorId => trim((string) $url)])
+            ->filter(fn ($url) => $url !== '')
+            ->all();
 
-        return view('backend.products.edit', compact('product', 'categories', 'colors', 'sizes', 'tags', 'productImages'));
+        return view('backend.products.edit', compact('product', 'categories', 'colors', 'sizes', 'tags', 'productImages', 'colorImageMap'));
     }
 
     public function update(Request $request, Product $product): RedirectResponse
@@ -155,6 +165,8 @@ class ProductController extends Controller
             'delete_image_ids.*' => ['integer'],
             'image_sort_order' => ['nullable', 'array'],
             'image_sort_order.*' => ['integer'],
+            'color_image_map' => ['nullable', 'array'],
+            'color_image_map.*' => ['nullable', 'string', 'max:500'],
         ]);
 
         $name = trim((string) $request->input('name', $product->name));
@@ -184,13 +196,14 @@ class ProductController extends Controller
             'sold_count' => (int) $request->input('sold_count', $product->sold_count),
         ]);
 
-        $product->colors()->sync($this->normalizeIds($request->input('color_ids', [])));
+        $colorIds = $this->normalizeIds($request->input('color_ids', []));
         $product->sizes()->sync($this->normalizeIds($request->input('size_ids', [])));
         $product->tags()->sync($this->normalizeIds($request->input('tag_ids', [])));
         $this->deleteSelectedImages($request);
         $this->updateImageSortOrder($request, $product->id);
         $this->storeUploadedImages($request, $product->id);
         $this->ensurePrimaryImage($product->id);
+        $product->colors()->sync($this->buildColorSyncPayload($product->id, $colorIds, $request->input('color_image_map', [])));
 
         return redirect()->route('backend.products')->with('success', 'Đã cập nhật sản phẩm.');
     }
@@ -393,6 +406,33 @@ class ProductController extends Controller
         }
 
         DB::table('product_images')->where('id', $firstImageId)->update(['is_primary' => 1]);
+    }
+
+    private function buildColorSyncPayload(int $productId, array $colorIds, mixed $colorImageMapInput): array
+    {
+        if (count($colorIds) === 0) {
+            return [];
+        }
+
+        $requestedMap = is_array($colorImageMapInput) ? $colorImageMapInput : [];
+        $allowedImageUrls = DB::table('product_images')
+            ->where('product_id', $productId)
+            ->pluck('image_url')
+            ->map(fn ($url) => trim((string) $url))
+            ->filter(fn ($url) => $url !== '')
+            ->all();
+
+        $allowedLookup = array_fill_keys($allowedImageUrls, true);
+        $payload = [];
+
+        foreach ($colorIds as $colorId) {
+            $rawValue = trim((string) ($requestedMap[$colorId] ?? ''));
+            $payload[$colorId] = [
+                'image_url' => ($rawValue !== '' && isset($allowedLookup[$rawValue])) ? $rawValue : null,
+            ];
+        }
+
+        return $payload;
     }
 
     private function productCategoryOptions()
