@@ -125,9 +125,42 @@
             <div class="success-product-info vietqr-payment-info">
               <h3>{{ $vietqrPayment['bank_name'] }}</h3>
               <p>Chủ tài khoản: {{ $vietqrPayment['account_name'] }}</p>
-              <p>Số tài khoản: {{ $vietqrPayment['account_no'] }}</p>
-              <p>Số tiền: {{ number_format((float) $vietqrPayment['amount'], 0, ',', '.') }}đ</p>
-              <p>Nội dung: {{ $vietqrPayment['transfer_content'] }}</p>
+              <p class="vietqr-copy-row">
+                <span>Số tài khoản: {{ $vietqrPayment['account_no'] }}</span>
+                <button
+                  type="button"
+                  class="vietqr-copy-button"
+                  data-copy-text="{{ $vietqrPayment['account_no'] }}"
+                  aria-label="Sao chép số tài khoản"
+                  title="Sao chép số tài khoản"
+                >
+                  <i class="bi bi-copy" aria-hidden="true"></i>
+                </button>
+              </p>
+              <p class="vietqr-copy-row">
+                <span>Số tiền: {{ number_format((float) $vietqrPayment['amount'], 0, ',', '.') }}đ</span>
+                <button
+                  type="button"
+                  class="vietqr-copy-button"
+                  data-copy-text="{{ number_format((float) $vietqrPayment['amount'], 0, '', '') }}"
+                  aria-label="Sao chép số tiền"
+                  title="Sao chép số tiền"
+                >
+                  <i class="bi bi-copy" aria-hidden="true"></i>
+                </button>
+              </p>
+              <p class="vietqr-copy-row">
+                <span>Nội dung: {{ $vietqrPayment['transfer_content'] }}</span>
+                <button
+                  type="button"
+                  class="vietqr-copy-button"
+                  data-copy-text="{{ $vietqrPayment['transfer_content'] }}"
+                  aria-label="Sao chép nội dung chuyển khoản"
+                  title="Sao chép nội dung chuyển khoản"
+                >
+                  <i class="bi bi-copy" aria-hidden="true"></i>
+                </button>
+              </p>
               <div class="vietqr-payment-actions">
                 <button
                   type="button"
@@ -395,7 +428,49 @@
     }
 
     .vietqr-payment-info p {
-      margin: 6px 0;
+      margin: 2px 0;
+    }
+
+    .vietqr-copy-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      flex-wrap: nowrap;
+      width: 100%;
+      margin-left: 0;
+      margin-right: 0;
+    }
+
+    .vietqr-copy-button {
+      width: 28px;
+      height: 28px;
+      border: 1px solid #dbe5f2;
+      background: #f6f9ff;
+      color: #163358;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex: 0 0 28px;
+      transition: all .2s ease;
+    }
+
+    .vietqr-copy-button i {
+      font-size: 14px;
+      line-height: 1;
+    }
+
+    .vietqr-copy-button:hover {
+      background: #e8f0ff;
+      border-color: #c9d9f3;
+    }
+
+    .vietqr-copy-button.is-copied {
+      background: #1b9f5a;
+      border-color: #1b9f5a;
+      color: #fff;
     }
 
     .vietqr-payment-actions {
@@ -627,6 +702,69 @@
       const autoNote = page.querySelector('[data-payment-auto-note]');
       const resumeWidget = document.querySelector('[data-vietqr-resume]');
       let redirected = false;
+      const copyTimers = new WeakMap();
+
+      const fallbackCopyText = function (text) {
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.setAttribute('readonly', '');
+        textArea.style.position = 'fixed';
+        textArea.style.top = '-9999px';
+        document.body.appendChild(textArea);
+        textArea.select();
+        const isCopied = document.execCommand('copy');
+        document.body.removeChild(textArea);
+        return isCopied;
+      };
+
+      const copyText = function (text) {
+        if (!text) {
+          return Promise.resolve(false);
+        }
+
+        if (navigator.clipboard && window.isSecureContext) {
+          return navigator.clipboard.writeText(text)
+            .then(function () {
+              return true;
+            })
+            .catch(function () {
+              return fallbackCopyText(text);
+            });
+        }
+
+        return Promise.resolve(fallbackCopyText(text));
+      };
+
+      const markCopyResult = function (button, isSuccess) {
+        if (!button) {
+          return;
+        }
+
+        const icon = button.querySelector('i');
+        if (!icon) {
+          return;
+        }
+
+        if (copyTimers.has(button)) {
+          window.clearTimeout(copyTimers.get(button));
+        }
+
+        if (isSuccess) {
+          button.classList.add('is-copied');
+          icon.className = 'bi bi-check2';
+          copyTimers.set(button, window.setTimeout(function () {
+            button.classList.remove('is-copied');
+            icon.className = 'bi bi-copy';
+          }, 1400));
+          return;
+        }
+
+        button.classList.remove('is-copied');
+        icon.className = 'bi bi-x';
+        copyTimers.set(button, window.setTimeout(function () {
+          icon.className = 'bi bi-copy';
+        }, 1000));
+      };
 
       const hidePopup = function () {
         if (!popup) {
@@ -851,6 +989,20 @@
       window.setInterval(pollStatus, 4000);
 
       document.addEventListener('click', function (event) {
+        const copyButton = event.target.closest('[data-copy-text]');
+
+        if (copyButton) {
+          event.preventDefault();
+          copyText((copyButton.dataset.copyText || '').trim())
+            .then(function (isSuccess) {
+              markCopyResult(copyButton, isSuccess);
+            })
+            .catch(function () {
+              markCopyResult(copyButton, false);
+            });
+          return;
+        }
+
         const screenshotButton = event.target.closest('[data-payment-screenshot]');
 
         if (screenshotButton) {
