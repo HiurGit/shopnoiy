@@ -400,9 +400,11 @@
     (() => {
       const loginInput = document.querySelector('#login');
       const passwordInput = document.querySelector('#password');
-      const loginForm = loginInput ? loginInput.closest('form') : null;
       const loginStorageKey = 'shopnoiy_saved_login';
-      const passwordStorageKey = 'shopnoiy_saved_password';
+
+      try {
+        localStorage.removeItem('shopnoiy_saved_password');
+      } catch (error) {}
 
       if (loginInput) {
         const serverValue = loginInput.value.trim();
@@ -413,41 +415,6 @@
           loginInput.value = savedValue;
         }
 
-        if (serverValue) {
-          localStorage.setItem(loginStorageKey, serverValue);
-        }
-      }
-
-      if (passwordInput) {
-        const serverPassword = passwordInput.value;
-        const savedPassword = localStorage.getItem(passwordStorageKey) || '';
-
-        if (!serverPassword && savedPassword) {
-          passwordInput.value = savedPassword;
-        }
-
-        if (serverPassword) {
-          localStorage.setItem(passwordStorageKey, serverPassword);
-        }
-      }
-
-      if (loginForm && loginInput) {
-        loginForm.addEventListener('submit', () => {
-          const currentValue = loginInput.value.trim();
-          const currentPassword = passwordInput ? passwordInput.value : '';
-
-          if (currentValue) {
-            localStorage.setItem(loginStorageKey, currentValue);
-          } else {
-            localStorage.removeItem(loginStorageKey);
-          }
-
-          if (currentPassword) {
-            localStorage.setItem(passwordStorageKey, currentPassword);
-          } else {
-            localStorage.removeItem(passwordStorageKey);
-          }
-        });
       }
 
       document.querySelectorAll('[data-password-toggle]').forEach((toggleBtn) => {

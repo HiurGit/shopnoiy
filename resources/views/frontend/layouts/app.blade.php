@@ -250,6 +250,7 @@
     (() => {
       const cartStorageKey = 'shopnoiy:cart:v1';
       const vietqrResumeStorageKey = 'shopnoiy:vietqr-pending:v1';
+      const savedLoginFromSuccess = @json(session('frontend_saved_login'));
       const cartToastElement = document.querySelector('[data-cart-toast]');
       const cartToastClose = document.querySelector('[data-cart-toast-close]');
       const cartToastImage = document.querySelector('[data-cart-toast-image]');
@@ -261,6 +262,13 @@
       let cartToastTimer = null;
       let vietqrResumeTimerId = null;
       let vietqrStatusCheckTimerId = null;
+
+      if (typeof savedLoginFromSuccess === 'string' && savedLoginFromSuccess.trim() !== '') {
+        try {
+          localStorage.setItem('shopnoiy_saved_login', savedLoginFromSuccess.trim());
+          localStorage.removeItem('shopnoiy_saved_password');
+        } catch (error) {}
+      }
 
       const parseCartItems = () => {
         try {

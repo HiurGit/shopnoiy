@@ -69,7 +69,6 @@ class StorefrontController extends Controller
                 ->withErrors($validator)
                 ->withInput($request->only([
                     'login',
-                    'password',
                 ]));
         }
 
@@ -99,7 +98,6 @@ class StorefrontController extends Controller
             return back()
                 ->withInput($request->only([
                     'login',
-                    'password',
                 ]))
                 ->withErrors([
                     'login' => 'Thông tin đăng nhập hoặc mật khẩu chưa đúng.',
@@ -115,7 +113,8 @@ class StorefrontController extends Controller
 
         return redirect()
             ->intended(route('frontend.home'))
-            ->with('success', 'Đăng nhập thành công.');
+            ->with('success', 'Đăng nhập thành công.')
+            ->with('frontend_saved_login', $loginInput);
     }
 
     public function showCustomerRegisterForm(): View|RedirectResponse
