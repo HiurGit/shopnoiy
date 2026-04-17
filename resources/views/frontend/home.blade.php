@@ -1,4 +1,4 @@
-@extends('frontend.layouts.app')
+﻿@extends('frontend.layouts.app')
 
 @section('title', 'Trang chủ')
 @section('meta_title', 'Trang chủ')
@@ -150,10 +150,10 @@
         <div class="swiper-slide">
           <a href="{{ route('frontend.customer-ranking') }}" class="contact-item is-ranking">
             <div class="contact-icon">
-              <img src="{{ asset('cup.png') }}" alt="Xếp hạng" loading="lazy" decoding="async" fetchpriority="low">
+              <img src="{{ asset('cup.png') }}" alt="Xáº¿p háº¡ng" loading="lazy" decoding="async" fetchpriority="low">
             </div>
             <div class="contact-copy">
-              <strong>Xếp hạng</strong>
+              <strong>Xáº¿p háº¡ng</strong>
             </div>
             <span class="contact-arrow">
               <i class="bi bi-chevron-right"></i>
@@ -195,7 +195,7 @@
                 <div class="featured-meta product-compact-meta">
                   <span><i class="bi bi-star-fill"></i> {{ number_format((float) $product->rating_avg, 1) }}</span>
                   <span>Đã bán {{ number_format((int) $product->sold_count, 0, ',', '.') }}</span>
-                  <span><i class="bi bi-geo-alt-fill"></i> Buôn Hồ - Đăk Lăk</span>
+                  <span><i class="bi bi-geo-alt-fill"></i> Buôn Hồ - Đắk Lắk</span>
                 </div>
               </a>
             </article>
@@ -253,7 +253,7 @@
     @endforeach
 
     <div class="footer-copy">
-      <span>© {{ date('Y') }} {{ $siteName }}</span>
+      <span>Â© {{ date('Y') }} {{ $siteName }}</span>
       <span>Nguyễn Đình Thảo</span>
     </div>
   </footer>
@@ -465,3 +465,4 @@
   })();
 </script>
 @endpush
+

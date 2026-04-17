@@ -988,6 +988,9 @@ class StorefrontController extends Controller
                     $category,
                     'https://images.unsplash.com/photo-1603252109303-2751441dd157?auto=format&fit=crop&w=300&q=80'
                 );
+                $category->navigation_url = is_null($category->parent_id)
+                    ? route('frontend.subcategories', ['slug' => $category->slug])
+                    : route('frontend.childcategories', ['slug' => $category->slug]);
 
                 return $category;
             });
@@ -1216,7 +1219,6 @@ class StorefrontController extends Controller
         $productsTotal = $showProducts ? (clone $productsQuery)->count() : 0;
 
         $topCategories = Category::query()
-            ->whereNull('parent_id')
             ->where('status', 'active')
             ->orderBy('sort_order')
             ->orderBy('name')
@@ -1232,6 +1234,26 @@ class StorefrontController extends Controller
 
                 return $category;
             });
+        $topCategories = $this->sortCategoriesByParentTree($topCategories);
+        $categoryIdsWithChildren = $topCategories
+            ->pluck('parent_id')
+            ->filter(fn ($parentId) => !is_null($parentId))
+            ->map(fn ($parentId) => (int) $parentId)
+            ->unique()
+            ->all();
+        $topCategories = $topCategories->map(function (Category $category) use ($categoryIdsWithChildren) {
+            $hasChildren = in_array((int) $category->id, $categoryIdsWithChildren, true);
+            $category->navigation_url = $hasChildren
+                ? route('frontend.subcategories', ['slug' => $category->slug])
+                : (
+                    is_null($category->parent_id)
+                        ? route('frontend.subcategories', ['slug' => $category->slug])
+                        : route('frontend.childcategories', ['slug' => $category->slug])
+                );
+
+            return $category;
+        });
+        $categoryGroups = $this->groupCategoriesByParentTree($topCategories);
 
         if ($selectedCategory) {
             $selectedCategory->display_image = $this->categoryDisplayImage(
@@ -1276,7 +1298,7 @@ class StorefrontController extends Controller
 
         $breadcrumbSchema = $this->buildBreadcrumbSchema($breadcrumbItems);
 
-        return view('frontend.category', compact('selectedCategory', 'selectedTarget', 'queryText', 'productsTotal', 'topCategories', 'childCategories', 'showProducts', 'breadcrumbSchema'));
+        return view('frontend.category', compact('selectedCategory', 'selectedTarget', 'queryText', 'productsTotal', 'topCategories', 'categoryGroups', 'childCategories', 'showProducts', 'breadcrumbSchema'));
     }
 
     public function featuredProducts(): View
@@ -1377,8 +1399,14 @@ class StorefrontController extends Controller
     public function subcategories(?string $slug = null): View
     {
         $parentCategories = Category::query()
-            ->whereNull('parent_id')
             ->where('status', 'active')
+            ->whereIn('id', function ($query) {
+                $query->from('categories')
+                    ->select('parent_id')
+                    ->whereNotNull('parent_id')
+                    ->where('status', 'active')
+                    ->distinct();
+            })
             ->orderBy('sort_order')
             ->orderBy('name')
             ->get()
@@ -3298,5 +3326,91 @@ class StorefrontController extends Controller
         }
 
         return array_values(array_unique($descendantIds));
+    }
+
+    /**
+     * @param  \Illuminate\Support\Collection<int, \App\Models\Category>  $categories
+     * @return \Illuminate\Support\Collection<int, array{parent:\App\Models\Category,items:\Illuminate\Support\Collection<int,\App\Models\Category>}>
+     */
+    private function groupCategoriesByParentTree(Collection $categories): Collection
+    {
+        $categoryById = $categories->keyBy(fn (Category $category) => (int) $category->id);
+        $childrenByParentId = $categories
+            ->filter(fn (Category $category) => !is_null($category->parent_id))
+            ->groupBy(fn (Category $category) => (int) $category->parent_id);
+
+        $rootCategories = $categories->filter(function (Category $category) use ($categoryById) {
+            return is_null($category->parent_id) || !$categoryById->has((int) $category->parent_id);
+        })->values();
+
+        $collectBranchItems = function (Category $category) use (&$collectBranchItems, $childrenByParentId): Collection {
+            $items = collect([$category]);
+            /** @var \Illuminate\Support\Collection<int, \App\Models\Category> $children */
+            $children = $childrenByParentId->get((int) $category->id, collect());
+
+            foreach ($children as $childCategory) {
+                $items = $items->merge($collectBranchItems($childCategory));
+            }
+
+            return $items;
+        };
+
+        $groups = collect();
+        foreach ($rootCategories as $rootCategory) {
+            $groups->push([
+                'parent' => $rootCategory,
+                'items' => $collectBranchItems($rootCategory),
+            ]);
+        }
+
+        return $groups;
+    }
+
+    /**
+     * @param  \Illuminate\Support\Collection<int, \App\Models\Category>  $categories
+     * @return \Illuminate\Support\Collection<int, \App\Models\Category>
+     */
+    private function sortCategoriesByParentTree(Collection $categories): Collection
+    {
+        $ordered = $categories
+            ->sortBy([
+                ['sort_order', 'asc'],
+                ['name', 'asc'],
+                ['id', 'asc'],
+            ])
+            ->values();
+
+        $childrenByParentId = $ordered
+            ->filter(fn (Category $category) => !is_null($category->parent_id))
+            ->groupBy(fn (Category $category) => (int) $category->parent_id);
+
+        $result = collect();
+        $visited = [];
+
+        $appendCategory = function (Category $category) use (&$appendCategory, $childrenByParentId, &$result, &$visited) {
+            $categoryId = (int) $category->id;
+            if (isset($visited[$categoryId])) {
+                return;
+            }
+
+            $visited[$categoryId] = true;
+            $result->push($category);
+
+            /** @var \Illuminate\Support\Collection<int, \App\Models\Category> $children */
+            $children = $childrenByParentId->get($categoryId, collect());
+            foreach ($children as $childCategory) {
+                $appendCategory($childCategory);
+            }
+        };
+
+        foreach ($ordered->whereNull('parent_id') as $parentCategory) {
+            $appendCategory($parentCategory);
+        }
+
+        foreach ($ordered as $category) {
+            $appendCategory($category);
+        }
+
+        return $result->values();
     }
 }

@@ -9,6 +9,14 @@
     $metaUrl = trim($__env->yieldContent('canonical_url')) ?: url()->current();
     $metaRobots = trim($__env->yieldContent('meta_robots')) ?: ($frontendMetaRobots ?? 'index,follow');
   @endphp
+  @php
+    $showBottomNav = !request()->routeIs([
+      'frontend.product-detail',
+      'frontend.cart',
+      'frontend.checkout',
+      'frontend.vietqr.payment',
+    ]);
+  @endphp
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="csrf-token" content="{{ csrf_token() }}" />
@@ -106,8 +114,36 @@
   @stack('vendor_styles')
   @stack('head')
 </head>
-<body class="{{ trim($__env->yieldContent('body_class')) ?: 'promo-hidden' }}">
+<body class="{{ trim((trim($__env->yieldContent('body_class')) ?: 'promo-hidden') . ($showBottomNav ? ' has-bottom-nav' : '')) }}">
   @yield('content')
+  @if ($showBottomNav)
+    <nav class="home-bottom-nav" aria-label="Điều hướng nhanh">
+      <a href="{{ route('frontend.home') }}" class="home-bottom-nav__link {{ request()->routeIs('frontend.home') ? 'is-active' : '' }}" @if (request()->routeIs('frontend.home')) aria-current="page" @endif>
+        <i class="bi bi-house-door-fill" aria-hidden="true"></i>
+        <span>Home</span>
+      </a>
+      <a href="{{ route('frontend.search') }}" class="home-bottom-nav__link {{ request()->routeIs('frontend.search') ? 'is-active' : '' }}" @if (request()->routeIs('frontend.search')) aria-current="page" @endif>
+        <i class="bi bi-search" aria-hidden="true"></i>
+        <span>Search</span>
+      </a>
+      <a href="{{ route('frontend.category') }}" class="home-bottom-nav__link {{ request()->routeIs('frontend.category', 'frontend.subcategories', 'frontend.childcategories') ? 'is-active' : '' }}" @if (request()->routeIs('frontend.category', 'frontend.subcategories', 'frontend.childcategories')) aria-current="page" @endif>
+        <i class="bi bi-grid" aria-hidden="true"></i>
+        <span>Danh mục</span>
+      </a>
+      <a href="{{ route('frontend.cart') }}" class="home-bottom-nav__link home-bottom-nav__link--cart {{ request()->routeIs('frontend.cart') ? 'is-active' : '' }}" aria-label="Mở giỏ hàng" @if (request()->routeIs('frontend.cart')) aria-current="page" @endif>
+        <i class="bi bi-bag" aria-hidden="true"></i>
+        <span>Cart</span>
+      </a>
+      <a
+        href="{{ auth()->check() && auth()->user()?->role === 'customer' ? route('frontend.profile') : route('frontend.login') }}"
+        class="home-bottom-nav__link {{ request()->routeIs('frontend.profile*', 'frontend.login', 'frontend.register', 'frontend.password.*') ? 'is-active' : '' }}"
+        @if (request()->routeIs('frontend.profile*', 'frontend.login', 'frontend.register', 'frontend.password.*')) aria-current="page" @endif
+      >
+        <i class="bi bi-person" aria-hidden="true"></i>
+        <span>Profile</span>
+      </a>
+    </nav>
+  @endif
   @unless (request()->routeIs('frontend.search'))
     <livewire:frontend.search-page mode="overlay" />
   @endunless
@@ -502,7 +538,7 @@
       const syncCartBadges = () => {
         const count = parseCartItems().reduce((total, item) => total + (Number(item.qty) || 0), 0);
 
-        document.querySelectorAll('.bell-wrap, .cat-bell-wrap').forEach((link) => {
+        document.querySelectorAll('.bell-wrap, .cat-bell-wrap, .home-bottom-nav__link--cart').forEach((link) => {
           let badge = link.querySelector('.badge');
 
           if (count <= 0) {
@@ -910,7 +946,7 @@
       });
 
       document.addEventListener('click', (event) => {
-        const cartLink = event.target.closest('.bell-wrap, .cat-bell-wrap');
+        const cartLink = event.target.closest('.bell-wrap, .cat-bell-wrap, .home-bottom-nav__link--cart');
         if (!cartLink || !cartLink.getAttribute('href')) {
           return;
         }

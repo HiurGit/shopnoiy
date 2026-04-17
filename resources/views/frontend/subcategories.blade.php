@@ -98,7 +98,7 @@
       resetSwiperElement(element);
 
       new Swiper(element, {
-        slidesPerView: 3.15,
+        slidesPerView: 4,
         spaceBetween: 8,
         grabCursor: true,
         watchOverflow: true,
@@ -106,7 +106,7 @@
         observeParents: true,
         breakpoints: {
           400: {
-            slidesPerView: 3.6
+            slidesPerView: 4
           },
           576: {
             slidesPerView: 4
