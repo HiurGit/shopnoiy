@@ -2939,15 +2939,15 @@ body.has-bottom-nav .phone {
 }
 
 .home-bottom-nav__link i {
-  font-size: 15px;
+  font-size: 18px;
   line-height: 1;
 }
 
 .home-bottom-nav__link svg {
-  width: 18px;
-  height: 18px;
+  width: 22px;
+  height: 22px;
   display: block;
-  flex: 0 0 18px;
+  flex: 0 0 22px;
 }
 
 .home-bottom-nav__icon {
@@ -2989,13 +2989,13 @@ body.has-bottom-nav .phone {
 }
 
 .home-bottom-nav__link--center .home-bottom-nav__icon i {
-  font-size: 18px;
+  font-size: 22px;
   color: #fff;
 }
 
 .home-bottom-nav__link--center .home-bottom-nav__icon svg {
-  width: 21px;
-  height: 21px;
+  width: 25px;
+  height: 25px;
   color: #fff;
 }
 
