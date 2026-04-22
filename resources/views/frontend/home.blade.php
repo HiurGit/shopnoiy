@@ -150,10 +150,10 @@
         <div class="swiper-slide">
           <a href="{{ route('frontend.customer-ranking') }}" class="contact-item is-ranking">
             <div class="contact-icon">
-              <img src="{{ asset('cup.png') }}" alt="Xáº¿p háº¡ng" loading="lazy" decoding="async" fetchpriority="low">
+              <img src="{{ asset('cup.png') }}" alt="Xếp hạng" loading="lazy" decoding="async" fetchpriority="low">
             </div>
             <div class="contact-copy">
-              <strong>Xáº¿p háº¡ng</strong>
+              <strong>Xếp hạng</strong>
             </div>
             <span class="contact-arrow">
               <i class="bi bi-chevron-right"></i>
@@ -253,7 +253,7 @@
     @endforeach
 
     <div class="footer-copy">
-      <span>Â© {{ date('Y') }} {{ $siteName }}</span>
+      <span>© {{ date('Y') }} {{ $siteName }}</span>
       <span>Nguyễn Đình Thảo</span>
     </div>
   </footer>
