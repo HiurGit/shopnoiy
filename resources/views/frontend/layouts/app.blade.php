@@ -22,40 +22,6 @@
   <meta name="csrf-token" content="{{ csrf_token() }}" />
   <meta name="google-site-verification" content="UAlZvk2gzciJ8fOM6Eu0GnqQ2Joeckf5XTow3DzjPR4" />
   <title>{{ $metaTitle === $frontendMetaTitle ? $frontendMetaTitle : $metaTitle . ' | ' . $frontendMetaTitle }}</title>
-  @php
-    $visitorPageType = match (true) {
-      request()->routeIs('frontend.product-detail') => 'product_detail',
-      request()->routeIs('frontend.category') => 'category',
-      request()->routeIs('frontend.subcategories') => 'subcategory',
-      request()->routeIs('frontend.childcategories') => 'childcategory',
-      request()->routeIs('frontend.cart') => 'cart',
-      request()->routeIs('frontend.checkout') => 'checkout',
-      request()->routeIs('frontend.vietqr.payment') => 'vietqr_payment',
-      request()->routeIs('frontend.order-success') => 'order_success',
-      request()->routeIs('frontend.order-tracking') => 'order_tracking',
-      request()->routeIs('frontend.search') => 'search',
-      default => 'page',
-    };
-    $visitorActivityLabel = match ($visitorPageType) {
-      'product_detail' => 'Đang xem chi tiết sản phẩm',
-      'category', 'subcategory', 'childcategory' => 'Đang xem danh mục sản phẩm',
-      'cart' => 'Đang xem giỏ hàng',
-      'checkout' => 'Đang ở trang thanh toán',
-      'vietqr_payment' => 'Đang chờ thanh toán VietQR',
-      'order_success' => 'Vừa đặt hàng thành công',
-      'order_tracking' => 'Đang theo dõi đơn hàng',
-      'search' => 'Đang tìm kiếm sản phẩm',
-      default => 'Đang xem website',
-    };
-    $visitorMeta = [];
-    if (isset($product)) {
-      $visitorMeta['product_name'] = $product->name ?? null;
-      $visitorMeta['product_slug'] = $product->slug ?? null;
-    }
-    if (request()->routeIs('frontend.search')) {
-      $visitorMeta['search_query'] = trim((string) request('q', '')) ?: null;
-    }
-  @endphp
   <meta name="description" content="{{ $metaDescription }}" />
   <meta name="robots" content="{{ $metaRobots }}" />
   <link rel="canonical" href="{{ $metaUrl }}" />
@@ -1406,125 +1372,6 @@
       focusSearchPageInput();
       syncPendingVietqrWidget();
 
-      const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-      const visitorStorageKey = 'shopnoiy:visitor:v1';
-      const visitorTrackingRoute = @json(route('frontend.visitor-tracking'));
-      const visitorBaseContext = {
-        route_name: @json(request()->route()?->getName()),
-        page_type: @json($visitorPageType),
-        activity_label: @json($visitorActivityLabel),
-        meta: @json($visitorMeta, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
-      };
-      let visitorCurrentMeta = { ...(visitorBaseContext.meta || {}) };
-
-      const createVisitorToken = () => {
-        if (window.crypto && typeof window.crypto.randomUUID === 'function') {
-          return `v-${window.crypto.randomUUID()}`;
-        }
-
-        return `v-${Date.now()}-${Math.random().toString(36).slice(2, 12)}`;
-      };
-
-      const readVisitorToken = () => {
-        try {
-          const existing = localStorage.getItem(visitorStorageKey);
-          if (existing && existing.trim()) {
-            return existing.trim();
-          }
-        } catch (error) {}
-
-        const generated = createVisitorToken();
-
-        try {
-          localStorage.setItem(visitorStorageKey, generated);
-        } catch (error) {}
-
-        return generated;
-      };
-
-      let visitorLastTrackedAt = 0;
-      let visitorTrackTimerId = null;
-
-      const postVisitorTracking = (extra = {}, useBeacon = false) => {
-        const items = parseCartItems();
-        const mergedMeta = {
-          ...visitorCurrentMeta,
-          ...((extra && typeof extra.meta === 'object' && extra.meta !== null) ? extra.meta : {}),
-        };
-        visitorCurrentMeta = mergedMeta;
-        const payload = {
-          visitor_token: readVisitorToken(),
-          route_name: visitorBaseContext.route_name,
-          page_type: visitorBaseContext.page_type,
-          activity_label: visitorBaseContext.activity_label,
-          page_title: document.title || '',
-          current_path: window.location.pathname || '',
-          current_url: window.location.href || '',
-          referrer_url: document.referrer || '',
-          cart_count: items.reduce((total, item) => total + (Number(item.qty) || 0), 0),
-          cart_value: Math.round(items.reduce((total, item) => total + ((Number(item.price) || 0) * (Number(item.qty) || 0)), 0)),
-          meta: mergedMeta,
-          ...extra,
-        };
-
-        if (useBeacon && navigator.sendBeacon) {
-          const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
-          navigator.sendBeacon(visitorTrackingRoute, blob);
-          return;
-        }
-
-        window.fetch(visitorTrackingRoute, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'X-CSRF-TOKEN': csrfToken,
-            'X-Requested-With': 'XMLHttpRequest'
-          },
-          credentials: 'same-origin',
-          body: JSON.stringify(payload)
-        }).catch(() => {});
-
-        visitorLastTrackedAt = Date.now();
-      };
-
-      const scheduleVisitorTracking = (extra = {}, delayMs = 1200) => {
-        if (visitorTrackTimerId) {
-          window.clearTimeout(visitorTrackTimerId);
-        }
-
-        visitorTrackTimerId = window.setTimeout(() => {
-          postVisitorTracking(extra);
-        }, delayMs);
-      };
-
-      let visitorHeartbeatId = null;
-      const startVisitorHeartbeat = () => {
-        if (visitorHeartbeatId) {
-          window.clearInterval(visitorHeartbeatId);
-        }
-
-        postVisitorTracking();
-
-        visitorHeartbeatId = window.setInterval(() => {
-          if (document.visibilityState === 'visible') {
-            if ((Date.now() - visitorLastTrackedAt) >= 120000) {
-              postVisitorTracking();
-            }
-          }
-        }, 120000);
-      };
-
-      window.ShopNoiyVisitorTracking = {
-        update(extra = {}) {
-          scheduleVisitorTracking(extra);
-        }
-      };
-
-      startVisitorHeartbeat();
-      window.addEventListener('shopnoiy-cart-updated', () => scheduleVisitorTracking({}, 2500));
-      window.addEventListener('pagehide', () => postVisitorTracking({}, true));
-
       window.addEventListener('storage', (event) => {
         if (event.key === vietqrResumeStorageKey) {
           syncPendingVietqrWidget();
@@ -1535,9 +1382,6 @@
       document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'visible') {
           syncPendingVietqrWidget();
-          if ((Date.now() - visitorLastTrackedAt) >= 30000) {
-            scheduleVisitorTracking({}, 600);
-          }
         }
       });
 

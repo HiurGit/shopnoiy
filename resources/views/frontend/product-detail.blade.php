@@ -629,13 +629,6 @@
 
         window.ShopNoiyCart.addItem(addedItem);
         window.ShopNoiyCart.showToast(addedItem);
-        window.ShopNoiyVisitorTracking?.update({
-          activity_label: 'Đã thêm sản phẩm vào giỏ',
-          meta: {
-            product_name: productPayload.name || '',
-            product_slug: productPayload.slug || '',
-          }
-        });
         const label = button.querySelector('span');
         if (label) {
           window.clearTimeout(addCartFeedbackTimer);

@@ -783,52 +783,9 @@
       });
     });
 
-    const trackCheckoutActivity = (activityLabel) => {
-      window.ShopNoiyVisitorTracking?.update({
-        activity_label: activityLabel,
-        meta: {
-          customer_name: checkoutName?.value?.trim()?.replace(/\s+/g, ' ') || '',
-          customer_phone: normalizeVietnamPhone(checkoutPhone?.value || ''),
-          customer_email: checkoutEmail?.value?.trim() || '',
-        }
-      });
-    };
-
-    let checkoutTrackTimer = null;
-    const scheduleCheckoutTracking = (activityLabel, delay = 1500) => {
-      if (checkoutTrackTimer) {
-        window.clearTimeout(checkoutTrackTimer);
-      }
-
-      checkoutTrackTimer = window.setTimeout(() => {
-        trackCheckoutActivity(activityLabel);
-      }, delay);
-    };
-
-    [
-      checkoutName,
-      checkoutPhone,
-      checkoutEmail,
-      checkoutAddressLine,
-      checkoutNote,
-    ].forEach((field) => {
-      field?.addEventListener('input', () => scheduleCheckoutTracking('Đang nhập thông tin thanh toán'));
-      field?.addEventListener('blur', () => trackCheckoutActivity('Đang nhập thông tin thanh toán'));
-    });
-
-    [
-      checkoutProvince,
-      checkoutDistrict,
-      checkoutWard,
-      checkoutStoreSelect,
-    ].forEach((field) => {
-      field?.addEventListener('change', () => trackCheckoutActivity('Đang nhập thông tin thanh toán'));
-    });
-
     restoreCheckoutProfile();
     enforceAccountContact();
     syncPaymentCards();
-    trackCheckoutActivity('Đang nhập thông tin thanh toán');
 
     if (checkoutSubmit) {
       checkoutSubmit.addEventListener('click', async (event) => {
@@ -937,7 +894,6 @@
         try {
           checkoutSubmit.classList.add('is-disabled');
           checkoutSubmit.setAttribute('aria-disabled', 'true');
-          trackCheckoutActivity('Đang gửi đơn hàng');
 
           const response = await fetch(@json(route('frontend.place-order')), {
             method: 'POST',
