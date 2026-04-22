@@ -158,9 +158,6 @@
             @if ($canAccess('activity_logs'))
               <li class="nav-item"><a href="{{ route('backend.activity-logs') }}" class="nav-link {{ request()->routeIs('backend.activity-logs*') ? 'active' : '' }}"><i class="nav-icon bi bi-clock-history"></i><p>Nhật ký hoạt động</p></a></li>
             @endif
-            @if ($canAccess('visitor_sessions'))
-              <li class="nav-item"><a href="{{ route('backend.visitor-sessions') }}" class="nav-link {{ request()->routeIs('backend.visitor-sessions*') ? 'active' : '' }}"><i class="nav-icon bi bi-broadcast"></i><p>Khách đang online</p></a></li>
-            @endif
             @if ($isAdmin)
               <li class="nav-item"><a href="{{ route('backend.roles') }}" class="nav-link {{ request()->routeIs('backend.roles*') ? 'active' : '' }}"><i class="nav-icon bi bi-shield-lock"></i><p>Quản lý role</p></a></li>
             @endif

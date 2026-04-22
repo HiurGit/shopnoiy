@@ -387,15 +387,12 @@
           <div class="tab-pane fade" id="pane-payment" role="tabpanel" aria-labelledby="tab-payment">
             <div class="settings-pane">
               <div class="settings-title">Cấu hình thanh toán</div>
-              @php
-                $defaultPaymentMethod = old('payment_default_method', $settings['payment_default_method'] ?? 'cod');
-              @endphp
               <div class="row g-3">
                 <div class="col-md-4">
                   <label class="form-label">Phương thức mặc định</label>
                   <select class="form-select" name="payment_default_method">
-                    <option value="cod" {{ $defaultPaymentMethod === 'cod' ? 'selected' : '' }}>COD</option>
-                    <option value="vietqr" {{ $defaultPaymentMethod === 'vietqr' ? 'selected' : '' }}>VietQR</option>
+                    <option value="cod" {{ old('payment_default_method', $settings['payment_default_method'] ?? 'cod') === 'cod' ? 'selected' : '' }}>COD</option>
+                    <option value="vietqr" {{ old('payment_default_method', $settings['payment_default_method'] ?? 'cod') === 'vietqr' ? 'selected' : '' }}>VietQR</option>
                   </select>
                 </div>
                 <div class="col-md-8">

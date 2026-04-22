@@ -115,11 +115,6 @@ class BackendPermissionRegistry
                 'route' => 'backend.activity-logs',
                 'prefixes' => ['backend.activity-logs'],
             ],
-            'visitor_sessions' => [
-                'label' => 'Khach dang online',
-                'route' => 'backend.visitor-sessions',
-                'prefixes' => ['backend.visitor-sessions'],
-            ],
         ];
     }
 
@@ -153,3 +148,4 @@ class BackendPermissionRegistry
         return self::definitions()[$permission]['route'] ?? null;
     }
 }
+

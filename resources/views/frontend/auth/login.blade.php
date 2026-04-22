@@ -297,7 +297,7 @@
   <main class="phone login-page">
     <div class="login-shell">
       @include('frontend.partials.topbar', [
-        'headerClass' => 'topbar',
+        'headerClass' => 'topbar',
       ])
 
       <section class="login-card" aria-labelledby="customer-login-title">
@@ -359,7 +359,6 @@
                 type="password"
                 class="login-input @error('password') is-invalid @enderror"
                 placeholder="Nhập mật khẩu"
-                value="{{ old('password') }}"
                 autocomplete="current-password"
                 required
               >
@@ -399,12 +398,7 @@
   <script>
     (() => {
       const loginInput = document.querySelector('#login');
-      const passwordInput = document.querySelector('#password');
       const loginStorageKey = 'shopnoiy_saved_login';
-
-      try {
-        localStorage.removeItem('shopnoiy_saved_password');
-      } catch (error) {}
 
       if (loginInput) {
         const serverValue = loginInput.value.trim();

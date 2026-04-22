@@ -21,9 +21,7 @@ use App\Http\Controllers\Backend\RoleController;
 use App\Http\Controllers\Backend\SePayWebhookLogController;
 use App\Http\Controllers\Backend\SettingController;
 use App\Http\Controllers\Backend\StoreController;
-use App\Http\Controllers\Backend\VisitorSessionController;
 use App\Http\Controllers\Frontend\StorefrontController;
-use App\Http\Controllers\Frontend\VisitorTrackingController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [StorefrontController::class, 'home'])->name('frontend.home');
@@ -72,7 +70,6 @@ Route::middleware('signed')->post('/thanh-toan-vietqr/{invoice}/huy', [Storefron
 Route::post('/thanh-toan/vietqr/sepay-webhook', [StorefrontController::class, 'sepayWebhook'])->name('frontend.vietqr.sepay-webhook');
 Route::middleware('signed')->get('/dat-hang-thanh-cong/{order}', [StorefrontController::class, 'orderSuccess'])->name('frontend.order-success');
 Route::middleware(['signed', 'throttle:20,1'])->get('/o/{token}', [StorefrontController::class, 'orderTracking'])->name('frontend.order-tracking');
-Route::post('/theo-doi-khach', [VisitorTrackingController::class, 'store'])->name('frontend.visitor-tracking');
 
 Route::get('/thaodepzai/login', [AuthController::class, 'showLoginForm'])->name('backend.login');
 Route::middleware('throttle:admin-login')->post('/thaodepzai/login', [AuthController::class, 'login'])->name('backend.login.submit');
@@ -203,7 +200,6 @@ Route::middleware(['admin.auth', 'backend.permission', 'backend.activity'])->pre
     Route::get('/settings', [SettingController::class, 'index'])->name('settings');
     Route::post('/settings', [SettingController::class, 'update'])->name('settings.update');
     Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs');
-    Route::get('/visitor-sessions', [VisitorSessionController::class, 'index'])->name('visitor-sessions');
 
     Route::middleware('admin.only')->group(function () {
         Route::get('/roles', [RoleController::class, 'index'])->name('roles');

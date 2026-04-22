@@ -266,7 +266,7 @@
   <main class="phone register-page">
     <div class="register-shell">
       @include('frontend.partials.topbar', [
-        'headerClass' => 'topbar',
+        'headerClass' => 'topbar',
       ])
 
       <section class="register-card" aria-labelledby="customer-register-title">
@@ -352,7 +352,6 @@
                 type="password"
                 class="register-input @error('password') is-invalid @enderror"
                 placeholder="Nhập mật khẩu"
-                value="{{ old('password') }}"
                 autocomplete="new-password"
                 required
               >
@@ -381,7 +380,6 @@
                 type="password"
                 class="register-input @error('password') is-invalid @enderror"
                 placeholder="Nhập lại mật khẩu"
-                value="{{ old('password_confirmation') }}"
                 autocomplete="new-password"
                 required
               >

@@ -202,7 +202,7 @@
   </section>
 
   <section class="pd-detail-section">
-    <details class="pd-detail-item">
+    <details class="pd-detail-item" open>
       <summary>
         THÔNG TIN SẢN PHẨM
         <i class="bi bi-plus"></i>

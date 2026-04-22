@@ -90,11 +90,11 @@
         </svg>
         <span>Trang chủ</span>
       </a>
-      <a href="{{ route('frontend.search') }}" class="home-bottom-nav__link {{ request()->routeIs('frontend.search') ? 'is-active' : '' }}" @if (request()->routeIs('frontend.search')) aria-current="page" @endif>
+      <a href="{{ auth()->check() && auth()->user()?->role === 'customer' ? route('frontend.profile.orders') : route('frontend.login') }}" class="home-bottom-nav__link {{ request()->routeIs('frontend.profile.orders*') ? 'is-active' : '' }}" @if (request()->routeIs('frontend.profile.orders*')) aria-current="page" @endif>
         <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8">
-          <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-4.35-4.35m0 0A7.5 7.5 0 1 0 6.04 6.04a7.5 7.5 0 0 0 10.61 10.61Z" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 5.25A2.25 2.25 0 0 1 6 3h12a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 18 21H6a2.25 2.25 0 0 1-2.25-2.25V5.25Zm4.5 3h7.5m-7.5 4.5h7.5m-7.5 4.5h4.5" />
         </svg>
-        <span>Tìm kiếm</span>
+        <span>&#272;&#417;n h&#224;ng</span>
       </a>
       <a href="{{ route('frontend.category') }}" class="home-bottom-nav__link home-bottom-nav__link--center {{ request()->routeIs('frontend.category', 'frontend.subcategories', 'frontend.childcategories') ? 'is-active' : '' }}" @if (request()->routeIs('frontend.category', 'frontend.subcategories', 'frontend.childcategories')) aria-current="page" @endif>
         <span class="home-bottom-nav__icon" aria-hidden="true">

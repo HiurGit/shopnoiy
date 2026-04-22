@@ -51,7 +51,7 @@ class StorefrontController extends Controller
             return redirect()->route('frontend.home');
         }
 
-        return view('frontend.auth.login');
+        return $this->frontendView('auth.login');
     }
 
     public function customerLogin(Request $request): RedirectResponse
@@ -123,7 +123,7 @@ class StorefrontController extends Controller
             return redirect()->route('frontend.home');
         }
 
-        return view('frontend.auth.register');
+        return $this->frontendView('auth.register');
     }
 
     public function customerRegister(Request $request): RedirectResponse
@@ -164,8 +164,6 @@ class StorefrontController extends Controller
                 ->withInput($request->only([
                     'phone',
                     'email',
-                    'password',
-                    'password_confirmation',
                 ]));
         }
 
@@ -187,7 +185,6 @@ class StorefrontController extends Controller
             ->route('frontend.login')
             ->withInput([
                 'login' => $prefilledLogin,
-                'password' => (string) $request->input('password'),
             ])
             ->with('success', 'Tạo tài khoản thành công.');
     }
@@ -198,7 +195,7 @@ class StorefrontController extends Controller
             return redirect()->route('frontend.home');
         }
 
-        return view('frontend.auth.forgot-password');
+        return $this->frontendView('auth.forgot-password');
     }
 
     public function customerForgotPassword(Request $request): RedirectResponse
@@ -264,7 +261,7 @@ class StorefrontController extends Controller
                 ]);
         }
 
-        return view('frontend.auth.reset-password', [
+        return $this->frontendView('auth.reset-password', [
             'token' => $token,
             'email' => $email,
         ]);
@@ -307,7 +304,6 @@ class StorefrontController extends Controller
             ->route('frontend.login')
             ->withInput([
                 'login' => $validated['email'],
-                'password' => (string) $request->input('password'),
             ])
             ->with('success', 'Dat lai mat khau thanh cong. Ban co the dang nhap ngay.');
     }
@@ -319,7 +315,7 @@ class StorefrontController extends Controller
             return redirect()->route('frontend.login');
         }
 
-        return view('frontend.auth.change-password');
+        return $this->frontendView('auth.change-password');
     }
 
     public function customerChangePassword(Request $request): RedirectResponse
@@ -471,7 +467,7 @@ class StorefrontController extends Controller
             ->latest('created_at')
             ->paginate(12);
 
-        return view('frontend.auth.order-history', [
+        return $this->frontendView('auth.order-history', [
             'customerOrders' => $orders,
         ]);
     }
@@ -517,7 +513,7 @@ class StorefrontController extends Controller
             $pickupStore = DB::table('stores')->where('id', $order->store_id)->first();
         }
 
-        return view('frontend.auth.order-detail', [
+        return $this->frontendView('auth.order-detail', [
             'customerOrder' => $order,
             'customerOrderItems' => $orderItems,
             'customerOrderPayment' => $orderPayment,
@@ -572,7 +568,7 @@ class StorefrontController extends Controller
             ->map(fn ($part) => mb_strtoupper(mb_substr($part, 0, 1)))
             ->implode('');
 
-        return view('frontend.auth.profile', [
+        return $this->frontendView('auth.profile', [
             'customerUser' => $user,
             'customerDisplayName' => $displayName,
             'customerInitials' => $initials !== '' ? $initials : 'KH',
@@ -1010,7 +1006,7 @@ class StorefrontController extends Controller
         $footerInfo = $this->footerInfo();
         $siteName = $footerInfo['site_name'];
 
-        return view('frontend.home', compact('promoTicker', 'heroBanners', 'parentCategories', 'femaleCategories', 'maleCategories', 'featuredProducts', 'footerGroups', 'footerInfo', 'siteName', 'heroSectionActive', 'featuredSectionActive', 'contactSectionActive'));
+        return $this->frontendView('home', compact('promoTicker', 'heroBanners', 'parentCategories', 'femaleCategories', 'maleCategories', 'featuredProducts', 'footerGroups', 'footerInfo', 'siteName', 'heroSectionActive', 'featuredSectionActive', 'contactSectionActive'));
     }
 
     public function favicon(): RedirectResponse
@@ -1039,7 +1035,7 @@ class StorefrontController extends Controller
         $queryText = trim((string) request('q', ''));
         $preferredProductId = max(0, (int) request('product_id', 0));
 
-        return view('frontend.search', compact('queryText', 'preferredProductId'));
+        return $this->frontendView('search', compact('queryText', 'preferredProductId'));
     }
 
     public function policyPage(string $slug): View
@@ -1116,7 +1112,7 @@ class StorefrontController extends Controller
             ],
         ]);
 
-        return view('frontend.policy', compact('policy', 'policyLinks', 'footerGroups', 'footerInfo', 'siteName', 'breadcrumbSchema'));
+        return $this->frontendView('policy', compact('policy', 'policyLinks', 'footerGroups', 'footerInfo', 'siteName', 'breadcrumbSchema'));
     }
 
     public function customerRanking(): View
@@ -1168,7 +1164,7 @@ class StorefrontController extends Controller
             ['name' => 'Xếp hạng khách hàng', 'url' => route('frontend.customer-ranking')],
         ]);
 
-        return view('frontend.customer-ranking', compact(
+        return $this->frontendView('customer-ranking', compact(
             'customers',
             'topThree',
             'otherCustomers',
@@ -1298,7 +1294,7 @@ class StorefrontController extends Controller
 
         $breadcrumbSchema = $this->buildBreadcrumbSchema($breadcrumbItems);
 
-        return view('frontend.category', compact('selectedCategory', 'selectedTarget', 'queryText', 'productsTotal', 'topCategories', 'categoryGroups', 'childCategories', 'showProducts', 'breadcrumbSchema'));
+        return $this->frontendView('category', compact('selectedCategory', 'selectedTarget', 'queryText', 'productsTotal', 'topCategories', 'categoryGroups', 'childCategories', 'showProducts', 'breadcrumbSchema'));
     }
 
     public function featuredProducts(): View
@@ -1313,7 +1309,7 @@ class StorefrontController extends Controller
             ['name' => 'Sản phẩm nổi bật', 'url' => route('frontend.featured-products')],
         ]);
 
-        return view('frontend.featured-products', compact('featuredProductsTotal', 'breadcrumbSchema'));
+        return $this->frontendView('featured-products', compact('featuredProductsTotal', 'breadcrumbSchema'));
     }
 
     public function merchantFeed()
@@ -1468,7 +1464,7 @@ class StorefrontController extends Controller
 
         $breadcrumbSchema = $this->buildBreadcrumbSchema($breadcrumbItems);
 
-        return view('frontend.subcategories', compact('parentCategories', 'selectedParent', 'childCategories', 'breadcrumbSchema'));
+        return $this->frontendView('subcategories', compact('parentCategories', 'selectedParent', 'childCategories', 'breadcrumbSchema'));
     }
 
     public function childcategories(?string $slug = null): View
@@ -1540,7 +1536,7 @@ class StorefrontController extends Controller
 
         $breadcrumbSchema = $this->buildBreadcrumbSchema($breadcrumbItems);
 
-        return view('frontend.childcategories', compact('selectedParent', 'selectedChild', 'siblingChildCategories', 'breadcrumbSchema'));
+        return $this->frontendView('childcategories', compact('selectedParent', 'selectedChild', 'siblingChildCategories', 'breadcrumbSchema'));
     }
 
     public function productDetail(?string $slug = null): View
@@ -1623,7 +1619,7 @@ class StorefrontController extends Controller
 
         $breadcrumbSchema = $this->buildBreadcrumbSchema($breadcrumbItems);
 
-        return view('frontend.product-detail', [
+        return $this->frontendView('product-detail', [
             'product' => $product,
             'gallery' => $gallery,
             'relatedProducts' => $relatedProducts,
@@ -1640,7 +1636,7 @@ class StorefrontController extends Controller
         $cartItems = collect();
         $subtotal = 0;
 
-        return view('frontend.cart', compact('cartItems', 'subtotal'));
+        return $this->frontendView('cart', compact('cartItems', 'subtotal'));
     }
 
     public function productConfig(Product $product): JsonResponse
@@ -1710,7 +1706,7 @@ class StorefrontController extends Controller
         }
         $subtotal = 0;
 
-        return view('frontend.checkout', compact(
+        return $this->frontendView('checkout', compact(
             'cartItems',
             'stores',
             'subtotal',
@@ -2132,7 +2128,7 @@ class StorefrontController extends Controller
             $vietqrPayment = $this->buildVietqrPaymentData($order);
         }
 
-        return view('frontend.order-success', compact('order', 'orderItems', 'selectedStore', 'vietqrPayment'));
+        return $this->frontendView('order-success', compact('order', 'orderItems', 'selectedStore', 'vietqrPayment'));
     }
 
     public function orderTracking(string $token): View
@@ -2167,7 +2163,7 @@ class StorefrontController extends Controller
         );
         $qrSvg = (new Writer($qrRenderer))->writeString($trackingLink);
 
-        return view('frontend.order-tracking', compact('order', 'orderItems', 'selectedStore', 'trackingSettings', 'trackingLink', 'qrSvg'));
+        return $this->frontendView('order-tracking', compact('order', 'orderItems', 'selectedStore', 'trackingSettings', 'trackingLink', 'qrSvg'));
     }
 
     public function vietqrPaymentPage(int $invoice): View
@@ -2199,7 +2195,7 @@ class StorefrontController extends Controller
             ? URL::signedRoute('frontend.order-success', ['order' => $linkedOrder->id])
             : null;
 
-        return view('frontend.vietqr-payment', compact('invoice', 'invoiceItems', 'selectedStore', 'vietqrPayment', 'successUrl', 'linkedOrder'));
+        return $this->frontendView('vietqr-payment', compact('invoice', 'invoiceItems', 'selectedStore', 'vietqrPayment', 'successUrl', 'linkedOrder'));
     }
 
     public function vietqrPaymentStatus(int $invoice): JsonResponse
@@ -3413,4 +3409,11 @@ class StorefrontController extends Controller
 
         return $result->values();
     }
+
+    private function frontendView(string $view, array $data = []): View
+    {
+        return view("frontend.{$view}", $data);
+    }
 }
+
+

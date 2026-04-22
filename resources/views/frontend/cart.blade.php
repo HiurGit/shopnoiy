@@ -180,7 +180,6 @@
 
       const editTrigger = event.target.closest('[data-cart-edit-trigger]');
       if (editTrigger) {
-        window.ShopNoiyVisitorTracking?.update({ activity_label: 'Đang chỉnh sản phẩm trong giỏ' });
         openEditModal(Number(editTrigger.dataset.cartEditTrigger));
         return;
       }
@@ -348,17 +347,6 @@
         });
 
         closeEditModal();
-      });
-    }
-
-    if (checkoutButton) {
-      checkoutButton.addEventListener('click', (event) => {
-        if (checkoutButton.getAttribute('aria-disabled') === 'true') {
-          event.preventDefault();
-          return;
-        }
-
-        window.ShopNoiyVisitorTracking?.update({ activity_label: 'Từ giỏ hàng chuyển sang thanh toán' });
       });
     }
 
