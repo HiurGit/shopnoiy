@@ -221,9 +221,27 @@
 
     .login-meta {
       display: flex;
-      justify-content: flex-end;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
       margin: 8px 0 18px;
       font-size: 0.9rem;
+    }
+
+    .login-remember {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #444d4d;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .login-remember input {
+      width: 16px;
+      height: 16px;
+      margin: 0;
+      accent-color: #252c2c;
     }
 
     .login-link {
@@ -379,6 +397,16 @@
           </div>
 
           <div class="login-meta">
+            <label class="login-remember" for="remember">
+              <input
+                id="remember"
+                name="remember"
+                type="checkbox"
+                value="1"
+                @checked((bool) old('remember', true))
+              >
+              <span>Ghi nhớ đăng nhập</span>
+            </label>
             <a href="{{ route('frontend.password.forgot') }}" class="login-link">Quên mật khẩu?</a>
           </div>
 
@@ -398,7 +426,11 @@
   <script>
     (() => {
       const loginInput = document.querySelector('#login');
+      const passwordInput = document.querySelector('#password');
+      const rememberInput = document.querySelector('#remember');
       const loginStorageKey = 'shopnoiy_saved_login';
+      const prefilledPassword = @json((string) session('frontend_prefill_password', ''));
+      const shouldAutoRemember = @json((bool) session('frontend_autocheck_remember', false));
 
       if (loginInput) {
         const serverValue = loginInput.value.trim();
@@ -408,7 +440,14 @@
         if (!serverValue && savedValue) {
           loginInput.value = savedValue;
         }
+      }
 
+      if (passwordInput && !passwordInput.value && prefilledPassword) {
+        passwordInput.value = prefilledPassword;
+      }
+
+      if (rememberInput && shouldAutoRemember) {
+        rememberInput.checked = true;
       }
 
       document.querySelectorAll('[data-password-toggle]').forEach((toggleBtn) => {

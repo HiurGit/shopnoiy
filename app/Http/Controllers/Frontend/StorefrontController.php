@@ -69,6 +69,7 @@ class StorefrontController extends Controller
                 ->withErrors($validator)
                 ->withInput($request->only([
                     'login',
+                    'remember',
                 ]));
         }
 
@@ -98,6 +99,7 @@ class StorefrontController extends Controller
             return back()
                 ->withInput($request->only([
                     'login',
+                    'remember',
                 ]))
                 ->withErrors([
                     'login' => 'Thông tin đăng nhập hoặc mật khẩu chưa đúng.',
@@ -180,12 +182,15 @@ class StorefrontController extends Controller
         $this->syncCustomerProfileByUserId((int) $customer->id);
 
         $prefilledLogin = $normalizedPhone ?: $normalizedEmail;
+        $plainPassword = (string) $request->input('password');
 
         return redirect()
             ->route('frontend.login')
             ->withInput([
                 'login' => $prefilledLogin,
             ])
+            ->with('frontend_prefill_password', $plainPassword)
+            ->with('frontend_autocheck_remember', true)
             ->with('success', 'Tạo tài khoản thành công.');
     }
 
@@ -3415,5 +3420,3 @@ class StorefrontController extends Controller
         return view("frontend.{$view}", $data);
     }
 }
-
-
