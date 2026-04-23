@@ -39,16 +39,24 @@
             @if (!empty($banner->subtitle))
               <p class="hero-eyebrow">{{ $banner->subtitle }}</p>
             @endif
-            <h1>{{ $banner->title ?: ' ' }}</h1>
-           
+            <ul class="hero-benefits" aria-hidden="true">
+       <li><i class="bi bi-check2-circle"></i> Chất lượng đảm bảo</li>
+              <li><i class="bi bi-truck"></i> Freeship Buôn Hồ</li>
+              <li><i class="bi bi-arrow-repeat"></i> Đổi trả miễn phí</li>
+            </ul>
+            <span class="hero-cta">MUA NGAY <i class="bi bi-arrow-right-short"></i></span>
           </div>
         </a>
       @empty
         <a href="{{ route('frontend.category') }}" class="hero-slide swiper-slide">
           <img src="https://images.unsplash.com/photo-1617137968427-85924c800a22?auto=format&fit=crop&w=1200&q=80" alt="Banner mặc định" loading="eager" decoding="async" fetchpriority="high" />
           <div class="hero-overlay">
-            <h1>Khám phá bộ sưu tập mới</h1>
-            <span class="hero-cta">Mua ngay</span>
+            <ul class="hero-benefits" aria-hidden="true">
+              <li><i class="bi bi-check2-circle"></i> Chất lượng đảm bảo</li>
+              <li><i class="bi bi-truck"></i> Freeship Buôn Hồ</li>
+              <li><i class="bi bi-arrow-repeat"></i> Đổi trả miễn phí</li>
+            </ul>
+            <span class="hero-cta">MUA NGAY <i class="bi bi-arrow-right-short"></i></span>
           </div>
         </a>
       @endforelse
