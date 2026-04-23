@@ -339,46 +339,37 @@
     }
 
     reinitializeSwiper('.category-swiper-female', {
-      slidesPerView: 4,
+      slidesPerView: 5,
       spaceBetween: 6,
       grabCursor: true,
       watchOverflow: true,
       breakpoints: {
-        400: {
-          slidesPerView: 4.2
-        },
-        576: {
-          slidesPerView: 4.8
+        0: {
+          slidesPerView: 5
         }
       }
     });
 
     reinitializeSwiper('.category-swiper-male', {
-      slidesPerView: 4,
+      slidesPerView: 5,
       spaceBetween: 6,
       grabCursor: true,
       watchOverflow: true,
       breakpoints: {
-        400: {
-          slidesPerView: 4.2
-        },
-        576: {
-          slidesPerView: 4.2
+        0: {
+          slidesPerView: 5
         }
       }
     });
 
     reinitializeSwiper('.contact-swiper', {
-      slidesPerView: 4,
+      slidesPerView: 5,
       spaceBetween: 6,
       grabCursor: true,
       watchOverflow: true,
       breakpoints: {
-        400: {
-          slidesPerView: 4.2
-        },
-        576: {
-          slidesPerView: 4.8
+        0: {
+          slidesPerView: 5
         }
       }
     });
