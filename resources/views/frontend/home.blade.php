@@ -9,6 +9,46 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 @endpush
 
+@push('styles')
+<style>
+  .hero-main img {
+    filter: saturate(1.04) contrast(1.06) brightness(1.02);
+  }
+
+  .hero-overlay {
+    background:
+      linear-gradient(115deg,
+        rgba(12, 18, 28, 0.2) 0%,
+        rgba(12, 18, 28, 0.12) 34%,
+        rgba(12, 18, 28, 0.06) 60%,
+        rgba(12, 18, 28, 0.02) 78%,
+        rgba(12, 18, 28, 0) 100%),
+      radial-gradient(120% 95% at 0% 100%,
+        rgba(255, 255, 255, 0.1) 0%,
+        rgba(255, 255, 255, 0.03) 42%,
+        rgba(255, 255, 255, 0) 68%);
+  }
+
+  @media (max-width: 768px) {
+    .hero-main img {
+      filter: saturate(1.02) contrast(1.04) brightness(1.01);
+    }
+
+    .hero-overlay {
+      background:
+        linear-gradient(120deg,
+          rgba(12, 18, 28, 0.18) 0%,
+          rgba(12, 18, 28, 0.1) 38%,
+          rgba(12, 18, 28, 0.05) 66%,
+          rgba(12, 18, 28, 0) 100%),
+        radial-gradient(118% 90% at 0% 100%,
+          rgba(255, 255, 255, 0.08) 0%,
+          rgba(255, 255, 255, 0) 65%);
+    }
+  }
+</style>
+@endpush
+
 @section('body_class', $promoTicker ? '' : 'promo-hidden')
 
 @section('content')
