@@ -30,6 +30,91 @@
       color: #17201f;
     }
 
+    .order-history-tabs {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 6px;
+      margin: 0 0 14px;
+      padding: 4px;
+      border-radius: 14px;
+      background: #f1f5f3;
+      border: 1px solid #e0e8e5;
+    }
+
+    .order-history-tab {
+      min-width: 0;
+      min-height: 38px;
+      padding: 7px 6px;
+      border-radius: 11px;
+      color: #65736f;
+      text-decoration: none;
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      font-size: 0.68rem;
+      font-weight: 800;
+      line-height: 1.15;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .order-history-tab.is-active {
+      background: #ffffff;
+      color: #17201f;
+      box-shadow: 0 8px 18px rgba(24, 39, 36, 0.08);
+    }
+
+    .order-history-tab__icon-wrap {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 38px;
+      height: 32px;
+    }
+
+    .order-history-tab__icon {
+      width: 30px;
+      height: 30px;
+      color: #6f7e79;
+      display: block;
+    }
+
+    .order-history-tab.is-active .order-history-tab__icon {
+      color: #00624f;
+    }
+
+    .order-history-tab__label {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 0;
+    }
+
+    .order-history-tab__count {
+      position: absolute;
+      top: -3px;
+      right: -4px;
+      min-width: 16px;
+      height: 16px;
+      padding: 0 4px;
+      border-radius: 999px;
+      background: #dfe8e4;
+      color: #51615c;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.62rem;
+      line-height: 1;
+    }
+
+    .order-history-tab.is-active .order-history-tab__count {
+      background: #e8f5ef;
+      color: #00624f;
+    }
+
     .order-list {
       display: grid;
       gap: 12px;
@@ -88,6 +173,34 @@
       text-align: right;
     }
 
+    .order-item__status-badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: #e8f5ef;
+      color: #00624f;
+      border: 1px solid #cde8dd;
+      font-size: 0.78rem;
+      font-weight: 800;
+      line-height: 1.2;
+      white-space: nowrap;
+    }
+
+    .order-item__status-badge.is-pending {
+      background: #fff5dd;
+      color: #946400;
+      border-color: #f3dfaa;
+    }
+
+    .order-item__status-badge.is-cancelled,
+    .order-item__status-badge.is-expired {
+      background: #f4ece9;
+      color: #9f3f26;
+      border-color: #ead0c7;
+    }
+
     .order-item__submeta {
       display: flex;
       align-items: center;
@@ -98,27 +211,14 @@
       font-size: 0.8rem;
     }
 
-    .order-item__badge {
-      display: inline-flex;
-      align-items: center;
-      min-height: 24px;
-      padding: 4px 9px;
-      border-radius: 999px;
-      background: #e9f4f0;
-      color: #005147;
-      font-weight: 700;
+    .order-item__payment-text {
+      color: #697772;
+      font-weight: 600;
       white-space: nowrap;
     }
 
-    .order-item__badge.is-cancelled,
-    .order-item__badge.is-expired {
-      background: #f4ece9;
-      color: #9f3f26;
-    }
-
-    .order-item__badge.is-unpaid {
-      background: #fff5dd;
-      color: #946400;
+    .order-item__payment-text.is-unpaid {
+      color: #697772;
     }
 
     .order-empty {
@@ -169,8 +269,62 @@
       <section class="order-history-card">
         <h2>Đơn hàng của bạn</h2>
 
+        @php
+          $orderHistoryTabs = $orderHistoryTabs ?? [
+              ['key' => 'verified', 'label' => 'Đã xác minh', 'count' => 0],
+              ['key' => 'pending', 'label' => 'Chờ xác minh', 'count' => 0],
+              ['key' => 'cancelled', 'label' => 'Đã hủy', 'count' => 0],
+          ];
+          $activeOrderHistoryTab = $activeOrderHistoryTab ?? 'verified';
+          $emptyText = match ($activeOrderHistoryTab) {
+              'pending' => 'Bạn chưa có đơn hàng chờ xác minh.',
+              'cancelled' => 'Bạn chưa có đơn hàng đã hủy.',
+              default => 'Bạn chưa có đơn hàng đã xác minh.',
+          };
+        @endphp
+
+        <nav class="order-history-tabs" aria-label="Lọc lịch sử đơn hàng">
+          @foreach ($orderHistoryTabs as $tab)
+            @php
+              $tabKey = (string) $tab['key'];
+              $tabUrl = route('frontend.profile.orders', array_merge(request()->except(['page', 'tab']), ['tab' => $tabKey]));
+            @endphp
+            <a
+              href="{{ $tabUrl }}"
+              class="order-history-tab {{ $activeOrderHistoryTab === $tabKey ? 'is-active' : '' }}"
+              @if ($activeOrderHistoryTab === $tabKey) aria-current="page" @endif
+            >
+              @if ($tabKey === 'verified')
+                <span class="order-history-tab__icon-wrap">
+                  <svg class="order-history-tab__icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21a3.745 3.745 0 0 1-3.068-1.593 3.745 3.745 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.745 3.745 0 0 1 3.296-1.043A3.745 3.745 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.745 3.745 0 0 1 3.296 1.043 3.745 3.745 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z" />
+                  </svg>
+                  <span class="order-history-tab__count">{{ (int) ($tab['count'] ?? 0) }}</span>
+                </span>
+              @elseif ($tabKey === 'pending')
+                <span class="order-history-tab__icon-wrap">
+                  <svg class="order-history-tab__icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                  </svg>
+                  <span class="order-history-tab__count">{{ (int) ($tab['count'] ?? 0) }}</span>
+                </span>
+              @else
+                <span class="order-history-tab__icon-wrap">
+                  <svg class="order-history-tab__icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                  </svg>
+                  <span class="order-history-tab__count">{{ (int) ($tab['count'] ?? 0) }}</span>
+                </span>
+              @endif
+              <span class="order-history-tab__label">
+                <span>{{ $tab['label'] }}</span>
+              </span>
+            </a>
+          @endforeach
+        </nav>
+
         @if ($customerOrders->isEmpty())
-          <p class="order-empty">Bạn chưa có đơn hàng nào.</p>
+          <p class="order-empty">{{ $emptyText }}</p>
         @else
           <div class="order-list">
             @foreach ($customerOrders as $order)
@@ -178,8 +332,13 @@
                 $historyType = (string) ($order->history_type ?? 'order');
                 $statusValue = strtolower((string) ($order->order_status ?? $order->invoice_status ?? ''));
                 $paymentStatusValue = strtolower((string) ($order->payment_status ?? ''));
-                $badgeClass = match (true) {
+                $statusBadgeClass = match (true) {
                     in_array($statusValue, ['cancelled', 'expired'], true) => 'is-cancelled',
+                    in_array($statusValue, ['pending_verification', 'pending_payment'], true) => 'is-pending',
+                    $statusValue === 'verified' => 'is-verified',
+                    default => '',
+                };
+                $paymentTextClass = match (true) {
                     in_array($paymentStatusValue, ['unpaid', 'pending', 'pending_payment'], true) => 'is-unpaid',
                     default => '',
                 };
@@ -198,11 +357,11 @@
                 </div>
                 <div class="order-item__meta">
                   <span>{{ optional($order->history_created_at)->format('d/m/Y H:i') ?: '-' }}</span>
-                  <span>{{ $order->history_status_label }}</span>
+                  <span class="order-item__status-badge {{ $statusBadgeClass }}">{{ $order->history_status_label }}</span>
                 </div>
                 <div class="order-item__submeta">
                   <span>{{ $historyType === 'invoice' ? 'Hóa đơn VietQR' : 'Đơn hàng' }}</span>
-                  <span class="order-item__badge {{ $badgeClass }}">{{ $order->history_payment_status_label }}</span>
+                  <span class="order-item__payment-text {{ $paymentTextClass }}">{{ $order->history_payment_status_label }}</span>
                 </div>
               </a>
             @endforeach

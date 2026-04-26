@@ -474,6 +474,7 @@ class StorefrontController extends Controller
             ->get()
             ->map(function (Order $order) {
                 $order->history_type = 'order';
+                $order->history_tab = $this->customerOrderHistoryTab((string) $order->order_status, 'order');
                 $order->history_code = $order->order_code ?: ('#' . $order->id);
                 $order->history_amount = (float) $order->total_amount;
                 $order->history_created_at = $order->created_at;
@@ -507,6 +508,7 @@ class StorefrontController extends Controller
             ->map(function ($invoice) {
                 $invoice = $this->expireVietqrInvoiceIfNeeded($invoice);
                 $invoice->history_type = 'invoice';
+                $invoice->history_tab = $this->customerOrderHistoryTab((string) $invoice->invoice_status, 'invoice');
                 $invoice->history_code = $invoice->invoice_code ?: ('#INV-' . $invoice->id);
                 $invoice->history_amount = (float) $invoice->total_amount;
                 $invoice->history_created_at = Carbon::parse($invoice->created_at);
@@ -520,6 +522,25 @@ class StorefrontController extends Controller
         $historyItems = collect($orders->all())
             ->merge($pendingInvoices)
             ->sortByDesc(fn ($item) => Carbon::parse($item->history_created_at ?? $item->created_at ?? now())->timestamp)
+            ->values();
+
+        $orderHistoryTabs = collect([
+            ['key' => 'verified', 'label' => 'Đã xác minh'],
+            ['key' => 'pending', 'label' => 'Chờ xác minh'],
+            ['key' => 'cancelled', 'label' => 'Đã hủy'],
+        ])->map(function (array $tab) use ($historyItems) {
+            $tab['count'] = $historyItems->where('history_tab', $tab['key'])->count();
+
+            return $tab;
+        })->all();
+
+        $activeOrderHistoryTab = (string) request()->query('tab', 'verified');
+        if (!in_array($activeOrderHistoryTab, ['verified', 'pending', 'cancelled'], true)) {
+            $activeOrderHistoryTab = 'verified';
+        }
+
+        $historyItems = $historyItems
+            ->where('history_tab', $activeOrderHistoryTab)
             ->values();
 
         $currentPage = LengthAwarePaginator::resolveCurrentPage();
@@ -537,7 +558,24 @@ class StorefrontController extends Controller
 
         return $this->frontendView('auth.order-history', [
             'customerOrders' => $orders,
+            'orderHistoryTabs' => $orderHistoryTabs,
+            'activeOrderHistoryTab' => $activeOrderHistoryTab,
         ]);
+    }
+
+    private function customerOrderHistoryTab(string $status, string $type): string
+    {
+        $status = strtolower($status);
+
+        if (in_array($status, ['cancelled', 'expired'], true)) {
+            return 'cancelled';
+        }
+
+        if ($type === 'invoice' || in_array($status, ['pending_verification', 'pending_payment', 'pending'], true)) {
+            return 'pending';
+        }
+
+        return 'verified';
     }
 
     private function customerPaymentStatusLabel(string $status, string $paymentMethod = ''): string
