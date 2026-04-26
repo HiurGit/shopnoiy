@@ -439,10 +439,10 @@
     </div>
 
     <div class="ranking-search-wrap">
-      <label class="ranking-search-label" for="ranking-search-input">Tìm khách hàng theo số điện thoại</label>
+      <label class="ranking-search-label" for="ranking-search-input">Tìm khách hàng theo tên hoặc số điện thoại</label>
       <div class="ranking-search-field">
         <i class="bi bi-search"></i>
-        <input type="text" id="ranking-search-input" class="ranking-search-input" placeholder="Ví dụ: 09 hoặc 123" data-ranking-search>
+        <input type="text" id="ranking-search-input" class="ranking-search-input" placeholder="Ví dụ: An hoặc 09" data-ranking-search>
         <button type="button" class="ranking-search-clear" aria-label="Xóa từ khóa" data-ranking-clear hidden>
           <i class="bi bi-x-lg"></i>
         </button>
@@ -461,6 +461,7 @@
             class="ranking-list-card"
             data-ranking-item
             data-ranking-phone="{{ preg_replace('/\s+/', '', mb_strtolower($customer->masked_phone ?: '')) }}"
+            data-ranking-name="{{ mb_strtolower($customer->display_name) }}"
           >
             <div class="ranking-list-rank">{{ $customer->rank }}</div>
             <div class="ranking-list-avatar {{ $tierBadgeClass((string) $customer->tier) }}" data-avatar-fallback="{{ $initials($customer->display_name) }}">
@@ -473,12 +474,8 @@
             </div>
 
             <div class="ranking-list-info">
-              <strong>{{ $customer->display_name }}</strong>
-              <span>
-                {{ $customer->masked_phone ?: 'Chưa có số điện thoại' }}
-                <span aria-hidden="true">•</span>
-                {{ number_format((int) $customer->total_orders) }} đơn hàng
-              </span>
+              <strong>{{ trim((string) ($customer->full_name ?? '')) !== '' ? $customer->display_name : ($customer->masked_phone ?: 'Chưa có số điện thoại') }}</strong>
+              <span>{{ number_format((int) $customer->total_orders) }} đơn hàng</span>
             </div>
 
             <div class="ranking-list-meta">
@@ -567,14 +564,25 @@
   }
 
   if (rankingSearchInput && rankingItems.length) {
+    const normalizeRankingText = (value) => String(value || '')
+      .trim()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/đ/g, 'd');
+
     const updateRankingSearch = () => {
       const keyword = String(rankingSearchInput.value || '').trim().toLowerCase();
+      const normalizedTextKeyword = normalizeRankingText(keyword);
       let visibleCount = 0;
 
       rankingItems.forEach((item) => {
         const phone = item.dataset.rankingPhone || '';
+        const name = normalizeRankingText(item.dataset.rankingName || '');
         const normalizedKeyword = keyword.replace(/\s+/g, '');
-        const matched = normalizedKeyword === '' || phone.includes(normalizedKeyword);
+        const matched = normalizedKeyword === ''
+          || phone.includes(normalizedKeyword)
+          || name.includes(normalizedTextKeyword);
         item.hidden = !matched;
         item.classList.toggle('is-filter-hidden', !matched);
         item.style.display = matched ? '' : 'none';
