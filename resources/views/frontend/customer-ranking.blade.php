@@ -216,7 +216,7 @@
 
   .ranking-list-card {
     display: grid;
-    grid-template-columns: 34px 42px minmax(0, 1fr) auto;
+    grid-template-columns: 34px 44px minmax(0, 1fr) minmax(104px, auto);
     align-items: center;
     gap: 10px;
     padding: 12px;
@@ -241,8 +241,8 @@
   }
 
   .ranking-list-avatar {
-    width: 34px;
-    height: 34px;
+    width: 44px;
+    height: 44px;
     border-radius: 999px;
     display: flex;
     align-items: center;
@@ -251,6 +251,29 @@
     font-weight: 800;
     background: #f3d7df;
     color: #b14973;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .ranking-list-avatar img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity .18s ease;
+  }
+
+  .ranking-list-avatar.is-loaded img {
+    opacity: 1;
+  }
+
+  .ranking-list-avatar__fallback {
+    position: relative;
+    z-index: 1;
+    line-height: 1;
   }
 
   .ranking-list-avatar.is-friendly {
@@ -275,47 +298,66 @@
 
   .ranking-list-info {
     min-width: 0;
+    display: grid;
+    grid-template-rows: repeat(2, 20px);
+    align-content: center;
   }
 
   .ranking-list-info strong {
     display: block;
     color: #24211d;
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 700;
-    line-height: 1.25;
+    line-height: 20px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .ranking-list-info span {
     display: block;
-    margin-top: 3px;
     color: #645c52;
     font-size: 12px;
+    line-height: 20px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .ranking-list-meta {
     text-align: right;
-    min-width: 64px;
+    min-width: 0;
+    display: grid;
+    grid-template-rows: repeat(2, 20px);
+    justify-items: end;
+    align-content: center;
   }
 
   .ranking-list-value {
     color: #24211d;
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 800;
-    line-height: 1.1;
+    line-height: 20px;
+    white-space: nowrap;
   }
 
   .ranking-list-tier {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 52px;
-    margin-top: 4px;
-    padding: 3px 8px;
+    max-width: 104px;
+    min-width: 0;
+    height: 20px;
+    padding: 0 8px;
     border-radius: 999px;
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 700;
+    line-height: 20px;
     background: #ededed;
     color: #69645d;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .ranking-list-tier.is-vip {
@@ -354,12 +396,23 @@
     }
 
     .ranking-list-card {
-      grid-template-columns: 30px 38px minmax(0, 1fr);
+      grid-template-columns: 28px 38px minmax(0, 1fr) minmax(88px, auto);
+      gap: 8px;
     }
 
-    .ranking-list-meta {
-      grid-column: 2 / 4;
-      margin-left: auto;
+    .ranking-list-avatar {
+      width: 38px;
+      height: 38px;
+      font-size: 12px;
+    }
+
+    .ranking-list-rank {
+      font-size: 15px;
+    }
+
+    .ranking-list-tier {
+      max-width: 88px;
+      padding: 0 6px;
     }
   }
 </style>
@@ -410,11 +463,22 @@
             data-ranking-phone="{{ preg_replace('/\s+/', '', mb_strtolower($customer->masked_phone ?: '')) }}"
           >
             <div class="ranking-list-rank">{{ $customer->rank }}</div>
-            <div class="ranking-list-avatar {{ $tierBadgeClass((string) $customer->tier) }}">{{ $initials($customer->display_name) }}</div>
+            <div class="ranking-list-avatar {{ $tierBadgeClass((string) $customer->tier) }}" data-avatar-fallback="{{ $initials($customer->display_name) }}">
+              @if (!empty($customer->avatar_src))
+                <span class="ranking-list-avatar__fallback">{{ $initials($customer->display_name) }}</span>
+                <img data-src="{{ $customer->avatar_src }}" alt="{{ $customer->display_name }}" loading="lazy" decoding="async" fetchpriority="low">
+              @else
+                <span class="ranking-list-avatar__fallback">{{ $initials($customer->display_name) }}</span>
+              @endif
+            </div>
 
             <div class="ranking-list-info">
-              <strong>{{ $customer->masked_phone ?: 'Chưa có số điện thoại' }}</strong>
-              <span>{{ number_format((int) $customer->total_orders) }} đơn hàng</span>
+              <strong>{{ $customer->display_name }}</strong>
+              <span>
+                {{ $customer->masked_phone ?: 'Chưa có số điện thoại' }}
+                <span aria-hidden="true">•</span>
+                {{ number_format((int) $customer->total_orders) }} đơn hàng
+              </span>
             </div>
 
             <div class="ranking-list-meta">
@@ -462,6 +526,45 @@
   const rankingItems = [...document.querySelectorAll('[data-ranking-item]')];
   const rankingEmpty = document.querySelector('[data-ranking-empty]');
   const rankingMeta = document.querySelector('[data-ranking-meta]');
+  const rankingAvatarImages = [...document.querySelectorAll('.ranking-list-avatar img[data-src]')];
+
+  if (rankingAvatarImages.length) {
+    const loadRankingAvatar = (image) => {
+      if (!image || image.dataset.loaded === 'true') {
+        return;
+      }
+
+      const avatar = image.closest('.ranking-list-avatar');
+      image.dataset.loaded = 'true';
+      image.addEventListener('load', () => {
+        avatar?.classList.add('is-loaded');
+      }, { once: true });
+      image.addEventListener('error', () => {
+        image.remove();
+      }, { once: true });
+      image.src = image.dataset.src;
+      image.removeAttribute('data-src');
+    };
+
+    if ('IntersectionObserver' in window) {
+      const avatarObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) {
+            return;
+          }
+
+          loadRankingAvatar(entry.target);
+          avatarObserver.unobserve(entry.target);
+        });
+      }, {
+        rootMargin: '180px 0px',
+      });
+
+      rankingAvatarImages.forEach((image) => avatarObserver.observe(image));
+    } else {
+      rankingAvatarImages.forEach(loadRankingAvatar);
+    }
+  }
 
   if (rankingSearchInput && rankingItems.length) {
     const updateRankingSearch = () => {

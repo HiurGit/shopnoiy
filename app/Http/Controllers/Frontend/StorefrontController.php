@@ -1300,6 +1300,7 @@ class StorefrontController extends Controller
                 u.id,
                 u.full_name,
                 u.phone,
+                u.avatar_url,
                 COALESCE(cp.tier, 'new') as tier,
                 COALESCE(cp.total_orders, 0) as total_orders,
                 COALESCE(cp.total_spent, 0) as total_spent
@@ -1319,6 +1320,12 @@ class StorefrontController extends Controller
                 $customer->rank = $index + 1;
                 $customer->display_name = trim((string) $customer->full_name) !== '' ? $customer->full_name : 'Khach #' . $customer->id;
                 $customer->masked_phone = $this->maskPhoneNumber($customer->phone);
+                $avatarPath = trim((string) ($customer->avatar_url ?? ''));
+                $customer->avatar_src = $avatarPath !== ''
+                    ? (str_starts_with($avatarPath, 'http://') || str_starts_with($avatarPath, 'https://')
+                        ? $avatarPath
+                        : asset(ltrim($avatarPath, '/')))
+                    : null;
 
                 return $customer;
             });
