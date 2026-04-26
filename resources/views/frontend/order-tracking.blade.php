@@ -9,6 +9,23 @@
   $shopPhone = trim((string) ($trackingSettings['contact_phone'] ?? $trackingSettings['hotline'] ?? ''));
   $shopAddress = trim((string) ($trackingSettings['contact_address'] ?? ''));
   $statusLabel = $order->order_status_label;
+  $paymentMethodValue = strtolower((string) ($order->payment_method ?? 'cod'));
+  $paymentStatusValue = strtolower((string) ($order->payment_status ?? 'unpaid'));
+  $trackingPaymentMethodLabel = match ($paymentMethodValue) {
+      'vietqr' => 'VietQR',
+      'cod' => 'Thanh toán khi nhận hàng',
+      default => strtoupper($paymentMethodValue),
+  };
+  $trackingPaymentStatusLabel = $paymentMethodValue === 'cod' && in_array($paymentStatusValue, ['unpaid', 'pending'], true)
+      ? 'Thanh toán khi nhận hàng'
+      : match ($paymentStatusValue) {
+          'paid' => 'Đã thanh toán',
+          'unpaid' => 'Chưa thanh toán',
+          'pending' => 'Đang chờ thanh toán',
+          'failed' => 'Thanh toán thất bại',
+          'refunded' => 'Đã hoàn tiền',
+          default => $paymentStatusValue,
+      };
   $itemsSummary = $orderItems->map(function ($item, $index) {
       $variant = trim((string) ($item->variant_name_snapshot ?? ''));
       $parts = array_filter([$item->product_name_snapshot, $variant !== '' ? $variant : null], fn ($value) => filled($value));
@@ -394,7 +411,7 @@
           <div class="summary-box">
             <div class="summary-title">Tiền thu người nhận</div>
             <div class="summary-value">{{ number_format((float) $order->total_amount, 0, ',', '.') }} VND</div>
-            <div class="summary-sub">Thanh toán: {{ strtoupper((string) $order->payment_method) }} / {{ $order->payment_status }}</div>
+            <div class="summary-sub">Thanh toán: {{ $trackingPaymentMethodLabel }} / {{ $trackingPaymentStatusLabel }}</div>
           </div>
           <div class="contact-box">
             Liên hệ shop:

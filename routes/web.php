@@ -31,6 +31,7 @@ Route::get('/chinh-sach/doi-tra-bao-hanh', [StorefrontController::class, 'policy
 Route::get('/chinh-sach/bao-mat-thong-tin', [StorefrontController::class, 'policyPage'])->defaults('slug', 'bao-mat-thong-tin')->name('frontend.policy.privacy');
 Route::get('/chinh-sach/van-chuyen', [StorefrontController::class, 'policyPage'])->defaults('slug', 'van-chuyen')->name('frontend.policy.shipping');
 Route::get('/chinh-sach/huong-dan', [StorefrontController::class, 'policyPage'])->defaults('slug', 'huong-dan')->name('frontend.policy.guide');
+Route::get('/ho-tro-khach-hang', [StorefrontController::class, 'customerSupport'])->name('frontend.customer-support');
 Route::get('/xep-hang-khach-hang', [StorefrontController::class, 'customerRanking'])->name('frontend.customer-ranking');
 Route::get('/tim-kiem', [StorefrontController::class, 'search'])->name('frontend.search');
 Route::get('/san-pham-noi-bat', [StorefrontController::class, 'featuredProducts'])->name('frontend.featured-products');

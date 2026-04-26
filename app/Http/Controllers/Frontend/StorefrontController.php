@@ -33,6 +33,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
@@ -470,11 +471,105 @@ class StorefrontController extends Controller
         $orders = Order::query()
             ->where('user_id', $user->id)
             ->latest('created_at')
-            ->paginate(12);
+            ->get()
+            ->map(function (Order $order) {
+                $order->history_type = 'order';
+                $order->history_code = $order->order_code ?: ('#' . $order->id);
+                $order->history_amount = (float) $order->total_amount;
+                $order->history_created_at = $order->created_at;
+                $order->history_status_label = $order->order_status_label ?? ucfirst((string) $order->order_status);
+                $order->history_payment_status_label = $this->customerPaymentStatusLabel((string) $order->payment_status, (string) $order->payment_method);
+                $order->history_url = route('frontend.profile.orders.detail', ['order' => $order->id]);
+
+                return $order;
+            });
+
+        $normalizedPhone = $this->normalizeVietnamPhone((string) ($user->phone ?? ''));
+        $normalizedEmail = $this->normalizeEmail((string) ($user->email ?? ''));
+
+        $pendingInvoices = DB::table('payment_invoices')
+            ->where('payment_method', 'vietqr')
+            ->whereNull('order_id')
+            ->whereIn('invoice_status', ['pending_payment', 'expired', 'cancelled'])
+            ->where(function ($query) use ($user, $normalizedPhone, $normalizedEmail): void {
+                $query->where('user_id', $user->id);
+
+                if ($normalizedPhone !== '') {
+                    $query->orWhere('customer_phone', $normalizedPhone);
+                }
+
+                if ($normalizedEmail !== null) {
+                    $query->orWhereRaw('LOWER(customer_email) = ?', [$normalizedEmail]);
+                }
+            })
+            ->latest('created_at')
+            ->get()
+            ->map(function ($invoice) {
+                $invoice = $this->expireVietqrInvoiceIfNeeded($invoice);
+                $invoice->history_type = 'invoice';
+                $invoice->history_code = $invoice->invoice_code ?: ('#INV-' . $invoice->id);
+                $invoice->history_amount = (float) $invoice->total_amount;
+                $invoice->history_created_at = Carbon::parse($invoice->created_at);
+                $invoice->history_status_label = $this->customerInvoiceStatusLabel((string) $invoice->invoice_status);
+                $invoice->history_payment_status_label = $this->customerPaymentStatusLabel((string) $invoice->payment_status, (string) $invoice->payment_method);
+                $invoice->history_url = URL::signedRoute('frontend.vietqr.payment', ['invoice' => $invoice->id]);
+
+                return $invoice;
+            });
+
+        $historyItems = collect($orders->all())
+            ->merge($pendingInvoices)
+            ->sortByDesc(fn ($item) => Carbon::parse($item->history_created_at ?? $item->created_at ?? now())->timestamp)
+            ->values();
+
+        $currentPage = LengthAwarePaginator::resolveCurrentPage();
+        $perPage = 12;
+        $orders = new LengthAwarePaginator(
+            $historyItems->forPage($currentPage, $perPage)->values(),
+            $historyItems->count(),
+            $perPage,
+            $currentPage,
+            [
+                'path' => request()->url(),
+                'query' => request()->query(),
+            ]
+        );
 
         return $this->frontendView('auth.order-history', [
             'customerOrders' => $orders,
         ]);
+    }
+
+    private function customerPaymentStatusLabel(string $status, string $paymentMethod = ''): string
+    {
+        $status = strtolower($status);
+        $paymentMethod = strtolower($paymentMethod);
+
+        if ($paymentMethod === 'cod' && in_array($status, ['unpaid', 'pending'], true)) {
+            return 'Thanh toán khi nhận hàng';
+        }
+
+        return match ($status) {
+            'unpaid' => 'Chưa thanh toán',
+            'pending' => 'Chờ thanh toán',
+            'paid' => 'Đã thanh toán',
+            'failed' => 'Thanh toán thất bại',
+            'cancelled' => 'Đã hủy',
+            'refunded' => 'Đã hoàn tiền',
+            'partial_refund', 'partially_refunded' => 'Hoàn tiền một phần',
+            default => ucwords(str_replace('_', ' ', $status)),
+        };
+    }
+
+    private function customerInvoiceStatusLabel(string $status): string
+    {
+        return match ($status) {
+            'pending_payment' => 'Chờ thanh toán',
+            'completed' => 'Hoàn tất',
+            'expired' => 'Hết hạn thanh toán',
+            'cancelled' => 'Đã hủy',
+            default => ucwords(str_replace('_', ' ', $status)),
+        };
     }
 
     public function customerOrderDetail(Order $order): View|RedirectResponse
@@ -501,9 +596,16 @@ class StorefrontController extends Controller
             ->values()
             ->all();
         $orderItemImageByProduct = $this->primaryImagesByProductIds($orderItemProductIds, $orderItemImageFallback);
-        $orderItems = $orderItems->map(function ($item) use ($orderItemImageByProduct, $orderItemImageFallback) {
+        $orderItemSlugByProduct = $orderItemProductIds !== []
+            ? DB::table('products')->whereIn('id', $orderItemProductIds)->pluck('slug', 'id')
+            : collect();
+        $orderItems = $orderItems->map(function ($item) use ($orderItemImageByProduct, $orderItemImageFallback, $orderItemSlugByProduct) {
             $productId = (int) ($item->product_id ?? 0);
+            $productSlug = (string) ($orderItemSlugByProduct[$productId] ?? '');
             $item->image_url = $orderItemImageByProduct[$productId] ?? $orderItemImageFallback;
+            $item->product_url = $productSlug !== ''
+                ? route('frontend.product-detail', ['slug' => $productSlug])
+                : null;
 
             return $item;
         });
@@ -846,6 +948,12 @@ class StorefrontController extends Controller
                 'priority' => '0.6',
             ],
             [
+                'loc' => route('frontend.customer-support'),
+                'lastmod' => now(),
+                'changefreq' => 'monthly',
+                'priority' => '0.5',
+            ],
+            [
                 'loc' => route('frontend.policy.return-warranty'),
                 'lastmod' => now(),
                 'changefreq' => 'monthly',
@@ -1118,6 +1226,32 @@ class StorefrontController extends Controller
         ]);
 
         return $this->frontendView('policy', compact('policy', 'policyLinks', 'footerGroups', 'footerInfo', 'siteName', 'breadcrumbSchema'));
+    }
+
+    public function customerSupport(): View
+    {
+        $guideLinks = [
+            [
+                'title' => 'Hướng dẫn mua hàng',
+                'description' => 'Xem các bước chọn sản phẩm, đặt hàng và theo dõi đơn.',
+                'icon' => 'bi-journal-text',
+                'url' => route('frontend.policy.guide'),
+            ],
+            [
+                'title' => 'Chính sách đổi trả',
+                'description' => 'Kiểm tra điều kiện đổi trả, bảo hành và thời gian xử lý.',
+                'icon' => 'bi-arrow-repeat',
+                'url' => route('frontend.policy.return-warranty'),
+            ],
+            [
+                'title' => 'Chính sách vận chuyển',
+                'description' => 'Xem thông tin giao hàng, nhận tại cửa hàng và phí vận chuyển.',
+                'icon' => 'bi-truck',
+                'url' => route('frontend.policy.shipping'),
+            ],
+        ];
+
+        return $this->frontendView('customer-support', compact('guideLinks'));
     }
 
     public function customerRanking(): View
@@ -1838,27 +1972,27 @@ class StorefrontController extends Controller
         $orderUserId = $checkoutCustomer ? (int) $checkoutCustomer->id : null;
         $validated['user_id'] = $orderUserId;
 
+        $existingPendingInvoice = $this->findActivePendingVietqrInvoiceByPhone($validated['customer_phone']);
+
+        if ($existingPendingInvoice) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Bạn đang có một hóa đơn VietQR chưa hoàn thành. Vui lòng thanh toán tiếp hoặc hủy hóa đơn cũ trước khi tạo hóa đơn mới.',
+                'existing_invoice' => [
+                    'invoice_id' => (int) $existingPendingInvoice->id,
+                    'invoice_code' => $existingPendingInvoice->invoice_code,
+                    'redirect_url' => URL::signedRoute('frontend.vietqr.payment', ['invoice' => $existingPendingInvoice->id]),
+                    'status_url' => URL::signedRoute('frontend.vietqr.payment-status', ['invoice' => $existingPendingInvoice->id]),
+                    'cancel_url' => URL::signedRoute('frontend.vietqr.payment-cancel', ['invoice' => $existingPendingInvoice->id]),
+                    'expires_at' => Carbon::parse($existingPendingInvoice->created_at)
+                        ->addMinutes($this->vietqrInvoiceExpireMinutes())
+                        ->getTimestampMs(),
+                ],
+                'requires_existing_invoice' => true,
+            ], 409);
+        }
+
         if (($validated['payment_method'] ?? 'cod') === 'vietqr') {
-            $existingPendingInvoice = $this->findActivePendingVietqrInvoiceByPhone($validated['customer_phone']);
-
-            if ($existingPendingInvoice) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Bạn đang có một hóa đơn VietQR chưa hoàn thành. Vui lòng thanh toán tiếp hoặc hủy hóa đơn cũ trước khi tạo hóa đơn mới.',
-                    'existing_invoice' => [
-                        'invoice_id' => (int) $existingPendingInvoice->id,
-                        'invoice_code' => $existingPendingInvoice->invoice_code,
-                        'redirect_url' => URL::signedRoute('frontend.vietqr.payment', ['invoice' => $existingPendingInvoice->id]),
-                        'status_url' => URL::signedRoute('frontend.vietqr.payment-status', ['invoice' => $existingPendingInvoice->id]),
-                        'cancel_url' => URL::signedRoute('frontend.vietqr.payment-cancel', ['invoice' => $existingPendingInvoice->id]),
-                        'expires_at' => Carbon::parse($existingPendingInvoice->created_at)
-                            ->addMinutes($this->vietqrInvoiceExpireMinutes())
-                            ->getTimestampMs(),
-                    ],
-                    'requires_existing_invoice' => true,
-                ], 409);
-            }
-
             $invoice = $this->createPaymentInvoiceRecord($validated, $normalizedItems);
 
             return response()->json([
@@ -2186,8 +2320,16 @@ class StorefrontController extends Controller
         $invoiceItems = $this->invoiceItems($invoice);
         $productIds = $invoiceItems->pluck('product_id')->filter()->map(fn ($id) => (int) $id)->unique()->values()->all();
         $imageByProduct = $this->primaryImagesByProductIds($productIds, 'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?auto=format&fit=crop&w=500&q=80');
-        $invoiceItems = $invoiceItems->map(function ($item) use ($imageByProduct) {
-            $item->image_url = $imageByProduct[$item->product_id] ?? 'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?auto=format&fit=crop&w=500&q=80';
+        $slugByProduct = $productIds !== []
+            ? DB::table('products')->whereIn('id', $productIds)->pluck('slug', 'id')
+            : collect();
+        $invoiceItems = $invoiceItems->map(function ($item) use ($imageByProduct, $slugByProduct) {
+            $productId = (int) ($item->product_id ?? 0);
+            $productSlug = (string) ($slugByProduct[$productId] ?? '');
+            $item->image_url = $imageByProduct[$productId] ?? 'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?auto=format&fit=crop&w=500&q=80';
+            $item->product_url = $productSlug !== ''
+                ? route('frontend.product-detail', ['slug' => $productSlug])
+                : null;
 
             return $item;
         });

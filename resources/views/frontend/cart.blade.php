@@ -84,6 +84,7 @@
     const editColors = document.querySelector('[data-cart-edit-colors]');
     const editSizes = document.querySelector('[data-cart-edit-sizes]');
     const editSubmit = document.querySelector('[data-cart-edit-submit]');
+    const productDetailUrlTemplate = @json(route('frontend.product-detail', ['slug' => '__SLUG__']));
     let editState = null;
 
     if (!cartPage || !window.ShopNoiyCart) {
@@ -135,31 +136,45 @@
         cartCount.textContent = `${totalItems} sản phẩm`;
       }
 
-      cartPage.innerHTML = items.map((item, index) => `
-        <article class="cart-item" data-cart-index="${index}">
-          <div class="cart-thumb">
-            <img src="${escapeHtml(item.image_url || '')}" alt="${escapeHtml(item.name || '')}" loading="lazy" decoding="async" />
-          </div>
+      cartPage.innerHTML = items.map((item, index) => {
+        const productUrl = item.slug
+          ? productDetailUrlTemplate.replace('__SLUG__', encodeURIComponent(String(item.slug)))
+          : '';
+        const productThumb = `<img src="${escapeHtml(item.image_url || '')}" alt="${escapeHtml(item.name || '')}" loading="lazy" decoding="async" />`;
+        const productName = escapeHtml(item.name || '');
 
-          <div class="cart-info">
-            <div class="cart-head-row">
-              <h2>${escapeHtml(item.name || '')}</h2>
-              <button class="cart-remove" aria-label="Xóa" type="button" data-cart-remove="${index}"><i class="bi bi-trash"></i></button>
+        return `
+          <article class="cart-item" data-cart-index="${index}">
+            <div class="cart-thumb">
+              ${productUrl
+                ? `<a href="${escapeHtml(productUrl)}" class="cart-product-link" aria-label="Xem chi tiết ${productName}">${productThumb}</a>`
+                : productThumb}
             </div>
 
-            <button class="cart-variant" type="button" data-cart-edit-trigger="${index}">${escapeHtml([item.color, item.size].filter(Boolean).join(' | ') || '-')}</button>
-
-            <div class="cart-bottom-row">
-              <div class="cart-qty">
-                <button type="button" aria-label="Giảm" data-cart-qty="decrease" data-cart-index="${index}" ${Number(item.qty) <= 1 ? 'disabled' : ''}>-</button>
-                <span>${Number(item.qty) || 1}</span>
-                <button type="button" aria-label="Tăng" data-cart-qty="increase" data-cart-index="${index}" ${Number(item.qty) >= 99 ? 'disabled' : ''}>+</button>
+            <div class="cart-info">
+              <div class="cart-head-row">
+                <h2>
+                  ${productUrl
+                    ? `<a href="${escapeHtml(productUrl)}" class="cart-product-name-link">${productName}</a>`
+                    : productName}
+                </h2>
+                <button class="cart-remove" aria-label="Xóa" type="button" data-cart-remove="${index}"><i class="bi bi-trash"></i></button>
               </div>
-              <div class="cart-price">${formatMoney(item.price)}</div>
+
+              <button class="cart-variant" type="button" data-cart-edit-trigger="${index}">${escapeHtml([item.color, item.size].filter(Boolean).join(' | ') || '-')}</button>
+
+              <div class="cart-bottom-row">
+                <div class="cart-qty">
+                  <button type="button" aria-label="Giảm" data-cart-qty="decrease" data-cart-index="${index}" ${Number(item.qty) <= 1 ? 'disabled' : ''}>-</button>
+                  <span>${Number(item.qty) || 1}</span>
+                  <button type="button" aria-label="Tăng" data-cart-qty="increase" data-cart-index="${index}" ${Number(item.qty) >= 99 ? 'disabled' : ''}>+</button>
+                </div>
+                <div class="cart-price">${formatMoney(item.price)}</div>
+              </div>
             </div>
-          </div>
-        </article>
-      `).join('');
+          </article>
+        `;
+      }).join('');
 
       if (subtotalElement) {
         subtotalElement.textContent = formatMoney(subtotal);

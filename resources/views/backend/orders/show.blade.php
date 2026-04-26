@@ -215,7 +215,16 @@
                   </tr>
                   <tr>
                     <th>Thanh toán</th>
-                    <td>{{ $order->payment_method }} / {{ $order->payment_status }}</td>
+                    <td>
+                      @php
+                        $backendPaymentMethod = strtolower((string) ($order->payment_method ?? ''));
+                        $backendPaymentStatus = strtolower((string) ($order->payment_status ?? 'unpaid'));
+                        $backendPaymentStatusLabel = $backendPaymentMethod === 'cod' && in_array($backendPaymentStatus, ['unpaid', 'pending'], true)
+                            ? 'Thanh toán khi nhận hàng'
+                            : $backendPaymentStatus;
+                      @endphp
+                      {{ $order->payment_method }} / {{ $backendPaymentStatusLabel }}
+                    </td>
                   </tr>
                   <tr>
                     <th>Trạng thái</th>

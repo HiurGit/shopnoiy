@@ -64,12 +64,19 @@
           <strong>{{ number_format((float) $invoice->total_amount, 0, ',', '.') }}đ</strong>
         </div>
       </div>
-      <a href="{{ route('frontend.cart') }}" class="success-link vietqr-payment-success-link">Quay lại giỏ hàng <i class="bi bi-chevron-double-right"></i></a>
+      <a href="{{ route('frontend.cart') }}" class="success-link vietqr-payment-success-link">
+        Quay lại giỏ hàng
+        <svg class="heroicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+        </svg>
+      </a>
     </section>
 
     <section class="success-card vietqr-payment-cancelled-card{{ $isInvoiceCancelled ? ' is-visible' : '' }}" data-payment-cancelled-card>
       <div class="vietqr-payment-expired-icon" aria-hidden="true">
-        <i class="bi bi-x-circle"></i>
+        <svg class="heroicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+        </svg>
       </div>
       <h1>Hóa đơn đã hủy</h1>
       <p class="success-text">Phiên thanh toán VietQR này đã được hủy. Bạn có thể quay lại để tạo đơn mới.</p>
@@ -83,13 +90,57 @@
           <strong>{{ number_format((float) $invoice->total_amount, 0, ',', '.') }}đ</strong>
         </div>
       </div>
+
+      <div class="vietqr-cancelled-products">
+        <h2>Chi tiết sản phẩm</h2>
+
+        @forelse ($invoiceItems as $item)
+          <article class="success-product-item">
+            <div class="success-product-thumb">
+              @if (!empty($item->product_url))
+                <a href="{{ $item->product_url }}" class="vietqr-product-link" aria-label="Xem chi tiết {{ $item->product_name_snapshot }}">
+                  <img src="{{ $item->image_url }}" alt="{{ $item->product_name_snapshot }}" loading="lazy" decoding="async" fetchpriority="low" />
+                </a>
+              @else
+                <img src="{{ $item->image_url }}" alt="{{ $item->product_name_snapshot }}" loading="lazy" decoding="async" fetchpriority="low" />
+              @endif
+            </div>
+
+            <div class="success-product-info">
+              <h3>
+                @if (!empty($item->product_url))
+                  <a href="{{ $item->product_url }}" class="vietqr-product-name-link">{{ $item->product_name_snapshot }}</a>
+                @else
+                  {{ $item->product_name_snapshot }}
+                @endif
+              </h3>
+              <p>{{ $item->variant_name_snapshot ?: '-' }}</p>
+              <div class="success-product-bottom">
+                <span>Số lượng: {{ (int) $item->qty }}</span>
+                <strong>{{ number_format((float) $item->unit_price, 0, ',', '.') }}đ</strong>
+              </div>
+            </div>
+          </article>
+        @empty
+          <p class="vietqr-cancelled-products__empty">Không có dữ liệu sản phẩm trong hóa đơn này.</p>
+        @endforelse
+      </div>
+
       <div class="vietqr-payment-success-links">
         <a href="{{ route('frontend.cart') }}" class="success-link vietqr-payment-success-link">
-          <i class="bi bi-bag"></i>
+          <span class="heroicon-button-mark" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-7">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+            </svg>
+          </span>
           <span>Về giỏ hàng</span>
         </a>
         <a href="{{ route('frontend.home') }}" class="success-link vietqr-payment-success-link">
-          <i class="bi bi-house-door"></i>
+          <span class="heroicon-button-mark" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-7">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+            </svg>
+          </span>
           <span>Về trang chủ</span>
         </a>
       </div>
@@ -171,7 +222,11 @@
                   <span>Chụp màn hình</span>
                 </button>
                 <button type="button" class="vietqr-payment-cancel" data-payment-cancel>
-                  <i class="bi bi-x-circle"></i>
+                  <span class="heroicon-button-mark" aria-hidden="true">
+                    <svg class="heroicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                    </svg>
+                  </span>
                   <span>Hủy hóa đơn</span>
                 </button>
               </div>
@@ -219,11 +274,23 @@
         @foreach ($invoiceItems as $item)
           <article class="success-product-item">
             <div class="success-product-thumb">
-              <img src="{{ $item->image_url }}" alt="{{ $item->product_name_snapshot }}" loading="lazy" decoding="async" fetchpriority="low" />
+              @if (!empty($item->product_url))
+                <a href="{{ $item->product_url }}" class="vietqr-product-link" aria-label="Xem chi tiết {{ $item->product_name_snapshot }}">
+                  <img src="{{ $item->image_url }}" alt="{{ $item->product_name_snapshot }}" loading="lazy" decoding="async" fetchpriority="low" />
+                </a>
+              @else
+                <img src="{{ $item->image_url }}" alt="{{ $item->product_name_snapshot }}" loading="lazy" decoding="async" fetchpriority="low" />
+              @endif
             </div>
 
             <div class="success-product-info">
-              <h3>{{ $item->product_name_snapshot }}</h3>
+              <h3>
+                @if (!empty($item->product_url))
+                  <a href="{{ $item->product_url }}" class="vietqr-product-name-link">{{ $item->product_name_snapshot }}</a>
+                @else
+                  {{ $item->product_name_snapshot }}
+                @endif
+              </h3>
               <p>{{ $item->variant_name_snapshot ?: '-' }}</p>
               <div class="success-product-bottom">
                 <span>Số lượng: {{ (int) $item->qty }}</span>
@@ -297,6 +364,123 @@
       display: none;
     }
 
+    .heroicon {
+      width: 1.25em;
+      height: 1.25em;
+      display: inline-block;
+      flex: 0 0 auto;
+      vertical-align: -0.18em;
+    }
+
+    .size-6 {
+      width: 1.5rem;
+      height: 1.5rem;
+      display: inline-block;
+      flex: 0 0 auto;
+    }
+
+    .heroicon-button-mark {
+      width: 26px;
+      height: 26px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(22, 51, 88, 0.08);
+      flex: 0 0 26px;
+    }
+
+    .heroicon-button-mark .heroicon {
+      width: 16px;
+      height: 16px;
+    }
+
+    .heroicon-button-mark .size-6 {
+      width: 19px;
+      height: 19px;
+    }
+
+    .vietqr-cancelled-products {
+      margin-top: 18px;
+      text-align: left;
+    }
+
+    .vietqr-cancelled-products h2 {
+      margin: 0 0 12px;
+      font-size: 0.98rem;
+      line-height: 1.3;
+      color: #17201f;
+    }
+
+    .vietqr-cancelled-products .success-product-item {
+      margin-bottom: 10px;
+      align-items: flex-start;
+    }
+
+    .vietqr-cancelled-products .success-product-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .vietqr-cancelled-products .success-product-thumb {
+      width: 76px;
+      height: 76px;
+      flex: 0 0 76px;
+    }
+
+    .vietqr-cancelled-products .success-product-info {
+      min-width: 0;
+    }
+
+    .vietqr-cancelled-products .success-product-info h3 {
+      margin: 0 0 4px;
+      font-size: 0.84rem;
+      line-height: 1.35;
+      font-weight: 700;
+      color: #17201f;
+    }
+
+    .vietqr-cancelled-products .success-product-info p {
+      margin: 0;
+      font-size: 0.74rem;
+      line-height: 1.35;
+      color: #66736f;
+    }
+
+    .vietqr-cancelled-products .success-product-bottom {
+      margin-top: 7px;
+      font-size: 0.76rem;
+      line-height: 1.35;
+    }
+
+    .vietqr-cancelled-products .success-product-bottom strong {
+      font-size: 0.8rem;
+    }
+
+    .vietqr-cancelled-products__empty {
+      margin: 0;
+      color: #66736f;
+      font-size: 0.88rem;
+      line-height: 1.45;
+    }
+
+    .vietqr-product-link {
+      display: block;
+      width: 100%;
+      height: 100%;
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .vietqr-product-name-link {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .vietqr-product-link:hover,
+    .vietqr-product-name-link:hover {
+      color: #005147;
+    }
+
     .vietqr-payment-success-icon {
       width: 84px;
       height: 84px;
@@ -326,6 +510,11 @@
       background: #fff4dc;
       color: #d28b00;
       font-size: 38px;
+    }
+
+    .vietqr-payment-expired-icon .heroicon {
+      width: 42px;
+      height: 42px;
     }
 
     .vietqr-payment-expired-card h1 {
@@ -369,17 +558,6 @@
       gap: 8px;
       box-shadow: 0 12px 24px rgba(22, 51, 88, 0.08);
       transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
-    }
-
-    .vietqr-payment-success-links .vietqr-payment-success-link i {
-      width: 26px;
-      height: 26px;
-      border-radius: 999px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(22, 51, 88, 0.08);
-      font-size: 14px;
     }
 
     .vietqr-payment-success-links .vietqr-payment-success-link:hover {
@@ -534,17 +712,6 @@
       box-shadow: 0 12px 24px rgba(22, 51, 88, 0.08);
       transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
       cursor: pointer;
-    }
-
-    .vietqr-payment-cancel i {
-      width: 26px;
-      height: 26px;
-      border-radius: 999px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(22, 51, 88, 0.08);
-      font-size: 14px;
     }
 
     .vietqr-payment-cancel:hover {

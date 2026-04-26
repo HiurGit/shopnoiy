@@ -185,7 +185,7 @@ class OrderEmailService
             'order_date' => optional($order->created_at)->format('d/m/Y H:i') ?? now()->format('d/m/Y H:i'),
             'verified_at' => optional($order->verified_at)->format('d/m/Y H:i'),
             'payment_method' => $this->paymentMethodLabel((string) $order->payment_method),
-            'payment_status' => $this->paymentStatusLabel((string) $order->payment_status),
+            'payment_status' => $this->paymentStatusLabel((string) $order->payment_status, (string) $order->payment_method),
             'delivery_label' => $deliveryLabel,
             'delivery_value' => $deliveryValue,
             'customer_phone' => (string) $order->customer_phone,
@@ -215,11 +215,19 @@ class OrderEmailService
         };
     }
 
-    private function paymentStatusLabel(string $paymentStatus): string
+    private function paymentStatusLabel(string $paymentStatus, string $paymentMethod = ''): string
     {
+        $paymentStatus = strtolower($paymentStatus);
+        $paymentMethod = strtolower($paymentMethod);
+
+        if ($paymentMethod === 'cod' && in_array($paymentStatus, ['unpaid', 'pending'], true)) {
+            return 'Thanh toán khi nhận hàng';
+        }
+
         return match ($paymentStatus) {
             'paid' => 'Đã thanh toán',
             'unpaid' => 'Chưa thanh toán',
+            'pending' => 'Đang chờ thanh toán',
             default => ucwords(str_replace('_', ' ', $paymentStatus)),
         };
     }

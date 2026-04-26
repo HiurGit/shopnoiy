@@ -231,6 +231,10 @@
       line-height: 1;
     }
 
+    .profile-menu__lead strong {
+      line-height: 1.35;
+    }
+
     .profile-section {
       margin-top: 22px;
       background: #fff;
@@ -455,6 +459,13 @@
             <div class="profile-menu__lead">
               <i class="bi bi-receipt"></i>
               <strong>Lịch sử mua hàng</strong>
+            </div>
+            <i class="bi bi-chevron-right"></i>
+          </a>
+          <a href="{{ route('frontend.customer-support') }}" class="profile-menu__item">
+            <div class="profile-menu__lead">
+              <i class="bi bi-headset"></i>
+              <strong>Hỗ trợ khách hàng</strong>
             </div>
             <i class="bi bi-chevron-right"></i>
           </a>

@@ -84,6 +84,43 @@
       font-size: 0.88rem;
     }
 
+    .order-item__meta span:last-child {
+      text-align: right;
+    }
+
+    .order-item__submeta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 8px;
+      color: #697772;
+      font-size: 0.8rem;
+    }
+
+    .order-item__badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 4px 9px;
+      border-radius: 999px;
+      background: #e9f4f0;
+      color: #005147;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .order-item__badge.is-cancelled,
+    .order-item__badge.is-expired {
+      background: #f4ece9;
+      color: #9f3f26;
+    }
+
+    .order-item__badge.is-unpaid {
+      background: #fff5dd;
+      color: #946400;
+    }
+
     .order-empty {
       margin: 0;
       padding: 16px;
@@ -137,21 +174,35 @@
         @else
           <div class="order-list">
             @foreach ($customerOrders as $order)
+              @php
+                $historyType = (string) ($order->history_type ?? 'order');
+                $statusValue = strtolower((string) ($order->order_status ?? $order->invoice_status ?? ''));
+                $paymentStatusValue = strtolower((string) ($order->payment_status ?? ''));
+                $badgeClass = match (true) {
+                    in_array($statusValue, ['cancelled', 'expired'], true) => 'is-cancelled',
+                    in_array($paymentStatusValue, ['unpaid', 'pending', 'pending_payment'], true) => 'is-unpaid',
+                    default => '',
+                };
+              @endphp
               <a
-                href="{{ route('frontend.profile.orders.detail', ['order' => $order->id]) }}"
+                href="{{ $order->history_url }}"
                 class="order-item"
-                aria-label="Xem chi tiết đơn {{ $order->order_code ?: ('#' . $order->id) }}"
+                aria-label="Xem chi tiết {{ $historyType === 'invoice' ? 'hóa đơn' : 'đơn' }} {{ $order->history_code }}"
               >
                 <div class="order-item__head">
                   <span class="order-item__code">
-              <i class="bi bi-box-seam"></i>
-                    {{ $order->order_code ?: ('#' . $order->id) }}
+                    <i class="bi {{ $historyType === 'invoice' ? 'bi-qr-code' : 'bi-box-seam' }}"></i>
+                    {{ $order->history_code }}
                   </span>
-                  <span class="order-item__amount">{{ number_format((float) $order->total_amount, 0, ',', '.') }}đ</span>
+                  <span class="order-item__amount">{{ number_format((float) $order->history_amount, 0, ',', '.') }}đ</span>
                 </div>
                 <div class="order-item__meta">
-                  <span>{{ optional($order->created_at)->format('d/m/Y H:i') ?: '-' }}</span>
-                  <span>{{ $order->order_status_label ?? ucfirst((string) $order->order_status) }}</span>
+                  <span>{{ optional($order->history_created_at)->format('d/m/Y H:i') ?: '-' }}</span>
+                  <span>{{ $order->history_status_label }}</span>
+                </div>
+                <div class="order-item__submeta">
+                  <span>{{ $historyType === 'invoice' ? 'Hóa đơn VietQR' : 'Đơn hàng' }}</span>
+                  <span class="order-item__badge {{ $badgeClass }}">{{ $order->history_payment_status_label }}</span>
                 </div>
               </a>
             @endforeach

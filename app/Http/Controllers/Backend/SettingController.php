@@ -110,7 +110,7 @@ class SettingController extends Controller
             'order_date' => now()->format('d/m/Y H:i'),
             'verified_at' => null,
             'payment_method' => 'Thanh toán khi nhận hàng (COD)',
-            'payment_status' => 'Chưa thanh toán',
+            'payment_status' => 'Thanh toán khi nhận hàng',
             'delivery_label' => 'Địa chỉ giao hàng',
             'delivery_value' => '25 Nguyễn Huệ, Phường An Bình, TP. Buôn Hồ',
             'customer_phone' => '0964 918 047',

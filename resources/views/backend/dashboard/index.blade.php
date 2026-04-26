@@ -109,6 +109,13 @@
                 </thead>
                 <tbody>
                   @forelse ($recentOrders as $order)
+                    @php
+                      $dashboardPaymentMethod = strtolower((string) ($order->payment_method ?? ''));
+                      $dashboardPaymentStatus = strtolower((string) ($order->payment_status ?? 'unpaid'));
+                      $dashboardPaymentStatusLabel = $dashboardPaymentMethod === 'cod' && in_array($dashboardPaymentStatus, ['unpaid', 'pending'], true)
+                          ? 'Thanh toán khi nhận hàng'
+                          : $dashboardPaymentStatus;
+                    @endphp
                     <tr>
                       <td>{{ $order->id }}</td>
                       <td>{{ $order->order_code }}</td>
@@ -122,7 +129,7 @@
                           {{ $order->order_status_label }}
                         @endif
                       </td>
-                      <td>{{ $order->payment_status }}</td>
+                      <td>{{ $dashboardPaymentStatusLabel }}</td>
                       <td>{{ number_format((float) $order->total_amount, 0, ',', '.') }}đ</td>
                       <td>{{ optional($order->created_at)->format('d/m/Y H:i') }}</td>
                       <td><a href="{{ route('backend.orders.show', $order) }}" class="btn btn-info btn-sm text-white">Xem</a></td>

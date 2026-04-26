@@ -30,7 +30,7 @@ class DashboardController extends Controller
         ];
 
         $recentOrders = Order::query()
-            ->select(['id', 'order_code', 'customer_name', 'order_status', 'payment_status', 'total_amount', 'created_at'])
+            ->select(['id', 'order_code', 'customer_name', 'order_status', 'payment_method', 'payment_status', 'total_amount', 'created_at'])
             ->orderByDesc('created_at')
             ->orderByDesc('id')
             ->limit(8)

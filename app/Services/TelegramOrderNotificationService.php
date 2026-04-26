@@ -87,20 +87,25 @@ class TelegramOrderNotificationService
             default => 'Giao hàng',
         };
 
-        $paymentMethod = match ((string) ($order->payment_method ?? 'cod')) {
+        $paymentMethodCode = strtolower((string) ($order->payment_method ?? 'cod'));
+        $paymentStatus = strtolower((string) ($order->payment_status ?? 'unpaid'));
+
+        $paymentMethod = match ($paymentMethodCode) {
             'vietqr' => 'VietQR',
             'cod' => 'COD',
             default => (string) ($order->payment_method ?? 'Khác'),
         };
 
-        $paymentStatusLabel = match ((string) ($order->payment_status ?? 'unpaid')) {
-            'paid' => 'Đã thanh toán',
-            'unpaid' => 'Chưa thanh toán',
-            'pending' => 'Đang chờ thanh toán',
-            'failed' => 'Thanh toán thất bại',
-            'refunded' => 'Đã hoàn tiền',
-            default => 'Chưa thanh toán',
-        };
+        $paymentStatusLabel = $paymentMethodCode === 'cod' && in_array($paymentStatus, ['unpaid', 'pending'], true)
+            ? 'Thanh toán khi nhận hàng'
+            : match ($paymentStatus) {
+                'paid' => 'Đã thanh toán',
+                'unpaid' => 'Chưa thanh toán',
+                'pending' => 'Đang chờ thanh toán',
+                'failed' => 'Thanh toán thất bại',
+                'refunded' => 'Đã hoàn tiền',
+                default => 'Chưa thanh toán',
+            };
 
         $address = trim((string) ($order->shipping_address_text ?? ''));
         $note = trim((string) ($order->note ?? ''));

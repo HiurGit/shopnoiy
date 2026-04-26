@@ -95,6 +95,21 @@
       grid-row: 1 / 3;
     }
 
+    .order-detail-item__thumb-link {
+      grid-column: 1;
+      grid-row: 1 / 3;
+      display: block;
+      width: 62px;
+      height: 62px;
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .order-detail-item__thumb-link .order-detail-item__thumb {
+      grid-column: auto;
+      grid-row: auto;
+    }
+
     .order-detail-item__content {
       min-width: 0;
       flex: 1;
@@ -118,6 +133,16 @@
       justify-content: space-between;
       align-items: flex-start;
       gap: 8px;
+    }
+
+    .order-detail-item__name-link {
+      min-width: 0;
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .order-detail-item__name-link:hover {
+      color: #005147;
     }
 
     .order-detail-item__price {
@@ -217,6 +242,10 @@
             'refunded' => 'Đã hoàn tiền',
             'partially_refunded' => 'Hoàn tiền một phần',
           ];
+
+          $paymentStatusLabel = $paymentMethod === 'cod' && in_array($paymentStatus, ['unpaid', 'pending'], true)
+            ? 'Thanh toán khi nhận hàng'
+            : ($paymentStatusLabels[$paymentStatus] ?? ucfirst((string) ($customerOrder->payment_status ?? 'unpaid')));
         @endphp
 
         <div class="order-detail-block">
@@ -263,7 +292,7 @@
           </div>
           <div class="order-detail-row">
             <span>Trạng thái thanh toán</span>
-            <strong>{{ $paymentStatusLabels[$paymentStatus] ?? ucfirst((string) ($customerOrder->payment_status ?? 'unpaid')) }}</strong>
+            <strong>{{ $paymentStatusLabel }}</strong>
           </div>
           @if (!empty($customerOrderPayment?->transaction_code))
             <div class="order-detail-row">
@@ -277,13 +306,31 @@
           <h2>Sản phẩm</h2>
           @forelse ($customerOrderItems as $item)
             <article class="order-detail-item">
-              <img
-                src="{{ (string) ($item->image_url ?? '') }}"
-                alt="{{ (string) ($item->product_name_snapshot ?? 'Sản phẩm') }}"
-                class="order-detail-item__thumb"
-                loading="lazy"
-              >
-              <p class="order-detail-item__name"><span>{{ (string) ($item->product_name_snapshot ?? 'Sản phẩm') }}</span><span class="order-detail-item__price">{{ number_format((float) ($item->unit_price ?? 0), 0, ',', '.') }}đ</span></p>
+              @if (!empty($item->product_url))
+                <a href="{{ $item->product_url }}" class="order-detail-item__thumb-link" aria-label="Xem chi tiết {{ (string) ($item->product_name_snapshot ?? 'Sản phẩm') }}">
+                  <img
+                    src="{{ (string) ($item->image_url ?? '') }}"
+                    alt="{{ (string) ($item->product_name_snapshot ?? 'Sản phẩm') }}"
+                    class="order-detail-item__thumb"
+                    loading="lazy"
+                  >
+                </a>
+              @else
+                <img
+                  src="{{ (string) ($item->image_url ?? '') }}"
+                  alt="{{ (string) ($item->product_name_snapshot ?? 'Sản phẩm') }}"
+                  class="order-detail-item__thumb"
+                  loading="lazy"
+                >
+              @endif
+              <p class="order-detail-item__name">
+                @if (!empty($item->product_url))
+                  <a href="{{ $item->product_url }}" class="order-detail-item__name-link">{{ (string) ($item->product_name_snapshot ?? 'Sản phẩm') }}</a>
+                @else
+                  <span>{{ (string) ($item->product_name_snapshot ?? 'Sản phẩm') }}</span>
+                @endif
+                <span class="order-detail-item__price">{{ number_format((float) ($item->unit_price ?? 0), 0, ',', '.') }}đ</span>
+              </p>
               <p class="order-detail-item__variant">{{ (string) ($item->variant_name_snapshot ?? '-') }} | SL: {{ (int) ($item->qty ?? 0) }}</p>
             </article>
           @empty

@@ -4,18 +4,24 @@
 
 @section('content')
 @php
-  $paymentMethodLabel = match ($order->payment_method) {
+  $paymentMethodValue = strtolower((string) $order->payment_method);
+  $paymentStatusValue = strtolower((string) $order->payment_status);
+  $paymentMethodLabel = match ($paymentMethodValue) {
     'vietqr' => 'VietQR',
     'cod' => 'Thanh toán khi nhận hàng (COD)',
-    default => strtoupper((string) $order->payment_method),
+    default => strtoupper($paymentMethodValue),
   };
-  $isPaid = $order->payment_status === 'paid';
-  $isPendingVietqr = $order->payment_method === 'vietqr' && !$isPaid;
+  $isPaid = $paymentStatusValue === 'paid';
+  $isPendingVietqr = $paymentMethodValue === 'vietqr' && !$isPaid;
   $pageTitle = $isPendingVietqr ? 'Đơn hàng đã tạo' : 'Đặt hàng thành công';
   $pageText = $isPendingVietqr
     ? 'Đơn hàng của bạn đã được ghi nhận. Vui lòng quét mã VietQR bên dưới để chuyển khoản.'
     : 'Cảm ơn bạn đã mua sắm tại Shop Nội Y';
-  $paymentStatusLabel = $isPaid ? 'Đã thanh toán' : 'Chưa thanh toán';
+  $paymentStatusLabel = match (true) {
+    $isPaid => 'Đã thanh toán',
+    $paymentMethodValue === 'cod' && in_array($paymentStatusValue, ['unpaid', 'pending'], true) => 'Thanh toán khi nhận hàng',
+    default => 'Chưa thanh toán',
+  };
   $paymentStatusClass = $isPaid ? 'success-paid' : 'success-pending';
   $orderStatusLabel = $order->order_status_label ?? 'Đã tiếp nhận';
   $subtotalAmount = (float) ($order->subtotal ?? $orderItems->sum(fn ($item) => ((float) $item->unit_price * (int) $item->qty)));
