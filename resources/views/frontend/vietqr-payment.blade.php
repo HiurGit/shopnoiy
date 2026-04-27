@@ -379,6 +379,13 @@
       flex: 0 0 auto;
     }
 
+    .size-7 {
+      width: 1.75rem;
+      height: 1.75rem;
+      display: inline-block;
+      flex: 0 0 auto;
+    }
+
     .heroicon-button-mark {
       width: 26px;
       height: 26px;
@@ -398,6 +405,13 @@
     .heroicon-button-mark .size-6 {
       width: 19px;
       height: 19px;
+    }
+
+    .heroicon-button-mark svg,
+    .heroicon-button-mark .size-7 {
+      width: 19px;
+      height: 19px;
+      display: block;
     }
 
     .vietqr-cancelled-products {
