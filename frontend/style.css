@@ -1357,6 +1357,27 @@ body.search-overlay-open {
   -webkit-box-orient: vertical;
 }
 
+.featured-thumb .product-thumb-footer-img,
+.subcat-image-wrap .product-thumb-footer-img,
+.cat-image-wrap .product-thumb-footer-img {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  width: 100%;
+  height: auto;
+  max-height: 34%;
+  object-fit: contain;
+  object-position: bottom center;
+}
+
+.featured-thumb .featured-badge {
+  top: 6px;
+  bottom: auto;
+  z-index: 3;
+}
+
 .featured-price-row {
   padding: 7px 10px 0;
   display: flex;
@@ -4008,6 +4029,7 @@ body.has-bottom-nav .scroll-top-btn {
 }
 
 .pd-gallery-swiper .swiper-slide {
+  position: relative;
   background: #f4f6fa;
 }
 
@@ -4016,6 +4038,20 @@ body.has-bottom-nav .scroll-top-btn {
   height: 100%;
   object-fit: cover;
   display: block;
+}
+
+.pd-gallery-swiper .pd-gallery-footer-img {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  width: 100%;
+  height: auto;
+  max-height: 24%;
+  object-fit: contain;
+  object-position: bottom center;
+  pointer-events: none;
 }
 
 .pd-gallery-index {
@@ -4028,7 +4064,7 @@ body.has-bottom-nav .scroll-top-btn {
   padding: 3px 8px;
   border-radius: 999px;
   font-weight: 600;
-  z-index: 3;
+  z-index: 4;
 }
 
 .pd-gallery-scrollbar {
@@ -4039,7 +4075,7 @@ body.has-bottom-nav .scroll-top-btn {
   height: 4px !important;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.36);
-  z-index: 2;
+  z-index: 4;
 }
 
 .pd-gallery-scrollbar .swiper-scrollbar-drag {

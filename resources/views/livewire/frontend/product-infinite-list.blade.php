@@ -34,6 +34,7 @@
           <a href="{{ route('frontend.product-detail', ['slug' => $product->slug]) }}" class="subcat-product-link">
             <div class="subcat-image-wrap">
               <img src="{{ $product->primary_image_url }}" alt="{{ $product->name }}" loading="lazy" decoding="async" fetchpriority="low" />
+              <img class="product-thumb-footer-img" src="{{ asset('footerIMG.webp') }}" alt="" loading="lazy" decoding="async" fetchpriority="low" aria-hidden="true" />
             </div>
             <p class="subcat-price">{{ number_format((float) $product->price, 0, ',', '.') }}đ</p>
             <p class="subcat-name">{{ $product->name }}</p>
@@ -79,6 +80,7 @@
           <a href="{{ route('frontend.product-detail', ['slug' => $product->slug]) }}" class="cat-product-link">
             <div class="cat-image-wrap">
               <img src="{{ $product->primary_image_url }}" alt="{{ $product->name }}" loading="lazy" decoding="async" fetchpriority="low" />
+              <img class="product-thumb-footer-img" src="{{ asset('footerIMG.webp') }}" alt="" loading="lazy" decoding="async" fetchpriority="low" aria-hidden="true" />
             </div>
             <p class="cat-price">{{ number_format((float) $product->price, 0, ',', '.') }}đ</p>
             <p class="cat-name">{{ $product->name }}</p>

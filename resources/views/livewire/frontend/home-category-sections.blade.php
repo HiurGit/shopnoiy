@@ -18,6 +18,7 @@
                 <a href="{{ route('frontend.product-detail', ['slug' => $product->slug]) }}" class="featured-product-link">
                   <div class="featured-thumb">
                     <img src="{{ $product->primary_image_url }}" alt="{{ $product->name }}" loading="lazy" decoding="async" fetchpriority="low" />
+                    <img class="product-thumb-footer-img" src="{{ asset('footerIMG.webp') }}" alt="" loading="lazy" decoding="async" fetchpriority="low" aria-hidden="true" />
                     @if ($product->is_featured)
                       <span class="featured-badge">Nổi bật</span>
                     @endif

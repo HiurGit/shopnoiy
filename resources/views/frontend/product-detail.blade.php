@@ -60,6 +60,7 @@
                 data-gallery-open
                 data-gallery-index="{{ $index }}"
               />
+              <img class="product-thumb-footer-img pd-gallery-footer-img" src="{{ asset('footerIMG.webp') }}" alt="" loading="lazy" decoding="async" fetchpriority="low" aria-hidden="true" />
             </div>
           @endforeach
         </div>
@@ -287,6 +288,7 @@
                 <a href="{{ route('frontend.product-detail', ['slug' => $related->slug]) }}" class="featured-product-link">
                   <div class="featured-thumb">
                     <img src="{{ $related->primary_image_url }}" alt="{{ $related->name }}" loading="lazy" decoding="async" fetchpriority="low" />
+                    <img class="product-thumb-footer-img" src="{{ asset('footerIMG.webp') }}" alt="" loading="lazy" decoding="async" fetchpriority="low" aria-hidden="true" />
                   </div>
                   <h3>{{ $related->name }}</h3>
                   <div class="featured-price-row">
