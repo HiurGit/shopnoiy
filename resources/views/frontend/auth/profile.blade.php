@@ -203,14 +203,32 @@
       align-items: center;
       justify-content: space-between;
       gap: 12px;
+      width: 100%;
       padding: 18px;
+      border: 0;
       color: #17201f;
+      background: transparent;
+      font: inherit;
       text-decoration: none;
       border-bottom: 1px solid #edf1ef;
+      cursor: pointer;
     }
 
     .profile-menu__item:last-child {
       border-bottom: 0;
+    }
+
+    .profile-menu__logout {
+      margin: 0;
+    }
+
+    .profile-menu__logout:last-child .profile-menu__item {
+      border-bottom: 0;
+    }
+
+    .profile-menu__logout .profile-menu__lead > i,
+    .profile-menu__logout .profile-menu__lead strong {
+      color: #b42318;
     }
 
     .profile-menu__item:hover {
@@ -347,23 +365,6 @@
       justify-self: start;
     }
 
-    .profile-logout {
-      margin-top: 24px;
-    }
-
-    .profile-logout button {
-      width: 100%;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      border: 0;
-      border-radius: 999px;
-      padding: 15px 20px;
-      background: #252c2c;
-      color: #fff;
-      font-size: 0.98rem;
-    }
   </style>
 @endpush
 
@@ -469,6 +470,16 @@
             </div>
             <i class="bi bi-chevron-right"></i>
           </a>
+          <form method="POST" action="{{ route('frontend.logout') }}" class="profile-menu__logout">
+            @csrf
+            <button type="submit" class="profile-menu__item">
+              <div class="profile-menu__lead">
+                <i class="bi bi-box-arrow-right"></i>
+                <strong>Đăng xuất</strong>
+              </div>
+              <i class="bi bi-chevron-right"></i>
+            </button>
+          </form>
         </section>
 
         <section class="profile-section" id="profile-info">
@@ -557,14 +568,6 @@
           </div>
         </section>
 
-
-        <form method="POST" action="{{ route('frontend.logout') }}" class="profile-logout">
-          @csrf
-          <button type="submit">
-         
-   ĐĂNG XUẤT
-          </button>
-        </form>
       </section>
     </div>
   </main>

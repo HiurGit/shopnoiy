@@ -50,8 +50,9 @@
       </p>
 
       <div class="checkout-tabs">
-        <button class="checkout-tab active" type="button" data-mode="delivery">Giao tận nơi</button>
-        <button class="checkout-tab" type="button" data-mode="pickup">Nhận tại cửa hàng</button>
+        <button class="checkout-tab active" type="button" data-mode="buon_ho">Khu Vực Buôn Hồ</button>
+        <button class="checkout-tab" type="button" data-mode="delivery">Khu Vực Khác</button>
+        <button class="checkout-tab" type="button" data-mode="pickup">Nhận Tại Cửa Hàng</button>
       </div>
 
       <div class="checkout-gender">
@@ -98,19 +99,19 @@
         <p class="checkout-account-note">Đang dùng thông tin tài khoản</p>
       @endif
 
-      <div class="checkout-row checkout-delivery-row">
+      <div class="checkout-row checkout-delivery-row checkout-address-select-row">
         <select class="checkout-select" name="address_level1" data-checkout-province autocomplete="address-level1">
           <option value="">Chọn tỉnh / thành phố</option>
         </select>
       </div>
 
-      <div class="checkout-row checkout-delivery-row">
+      <div class="checkout-row checkout-delivery-row checkout-address-select-row">
         <select class="checkout-select" name="address_level2" data-checkout-district autocomplete="address-level2" disabled>
           <option value="">Chọn quận / huyện</option>
         </select>
       </div>
 
-      <div class="checkout-row checkout-delivery-row">
+      <div class="checkout-row checkout-delivery-row checkout-address-select-row">
         <select class="checkout-select" name="address_level3" data-checkout-ward disabled>
           <option value="">Chọn phường / xã</option>
         </select>
@@ -341,6 +342,7 @@
     const vietqrExpireMinutes = @json($vietqrExpireMinutes);
     const checkoutTabs = document.querySelectorAll('.checkout-tab');
     const deliveryRows = document.querySelectorAll('.checkout-delivery-row');
+    const addressSelectRows = document.querySelectorAll('.checkout-address-select-row');
     const pickupRows = document.querySelectorAll('.checkout-pickup-row');
     const checkoutItems = document.querySelector('[data-checkout-items]');
     const checkoutSubtotal = document.querySelector('[data-checkout-subtotal]');
@@ -452,6 +454,8 @@
       return phone;
     };
 
+    const normalizeDeliveryMode = (mode) => ['delivery', 'buon_ho', 'pickup'].includes(mode) ? mode : 'buon_ho';
+
     const redirectToCartIfEmpty = () => {
       const items = window.ShopNoiyCart.getItems();
 
@@ -466,9 +470,10 @@
     const saveCheckoutProfile = () => {
       const activeTab = document.querySelector('.checkout-tab.active');
       const genderInput = document.querySelector('input[name="gender"]:checked');
+      const deliveryMode = normalizeDeliveryMode(activeTab?.dataset.mode);
 
       const payload = {
-        delivery_mode: activeTab?.dataset.mode === 'pickup' ? 'pickup' : 'delivery',
+        delivery_mode: deliveryMode,
         gender: genderInput?.value || '',
         customer_name: checkoutName?.value?.trim().replace(/\s+/g, ' ') || '',
         customer_phone: normalizeVietnamPhone(checkoutPhone?.value || ''),
@@ -493,8 +498,9 @@
     };
 
     const applyDeliveryMode = (mode) => {
-      const normalizedMode = mode === 'pickup' ? 'pickup' : 'delivery';
+      const normalizedMode = normalizeDeliveryMode(mode);
       const isPickup = normalizedMode === 'pickup';
+      const isBuonHo = normalizedMode === 'buon_ho';
 
       checkoutTabs.forEach((item) => {
         item.classList.toggle('active', item.dataset.mode === normalizedMode);
@@ -502,6 +508,9 @@
 
       deliveryRows.forEach((row) => {
         row.hidden = isPickup;
+      });
+      addressSelectRows.forEach((row) => {
+        row.hidden = isPickup || isBuonHo;
       });
       pickupRows.forEach((row) => {
         row.hidden = !isPickup;
@@ -541,8 +550,13 @@
       const district = getSelectedDistrict();
       return district?.wards?.find((item) => String(item.code) === String(checkoutWard?.value || '')) || null;
     };
-    const composeShippingAddress = () => {
+    const composeShippingAddress = (mode = 'delivery') => {
       const addressLine = checkoutAddressLine?.value?.trim().replace(/\s+/g, ' ') || '';
+
+      if (mode === 'buon_ho') {
+        return [addressLine, 'Buôn Hồ', 'Đắk Lắk'].filter(Boolean).join(', ');
+      }
+
       const wardName = getSelectedWard()?.name || '';
       const districtName = getSelectedDistrict()?.name || '';
       const provinceName = getSelectedProvince()?.name || '';
@@ -801,15 +815,16 @@
         }
 
         const activeTab = document.querySelector('.checkout-tab.active');
-        const deliveryType = activeTab?.dataset.mode === 'pickup' ? 'pickup' : 'delivery';
+        const checkoutMode = normalizeDeliveryMode(activeTab?.dataset.mode);
+        const deliveryType = checkoutMode === 'pickup' ? 'pickup' : 'delivery';
         const customerName = checkoutName?.value?.trim().replace(/\s+/g, ' ') || '';
         const customerPhone = normalizeVietnamPhone(checkoutPhone?.value || '');
         const customerEmail = checkoutEmail?.value?.trim() || '';
         const addressLine = checkoutAddressLine?.value?.trim().replace(/\s+/g, ' ') || '';
-        const selectedProvince = getSelectedProvince();
-        const selectedDistrict = getSelectedDistrict();
-        const selectedWard = getSelectedWard();
-        const shippingAddress = composeShippingAddress();
+        const selectedProvince = checkoutMode === 'buon_ho' ? { name: 'Đắk Lắk' } : getSelectedProvince();
+        const selectedDistrict = checkoutMode === 'buon_ho' ? { name: 'Buôn Hồ' } : getSelectedDistrict();
+        const selectedWard = checkoutMode === 'buon_ho' ? null : getSelectedWard();
+        const shippingAddress = composeShippingAddress(checkoutMode);
         const note = checkoutNote?.value?.trim() || '';
         const items = window.ShopNoiyCart.getItems();
 
@@ -855,19 +870,19 @@
           return;
         }
 
-        if (deliveryType === 'delivery' && !selectedProvince) {
+        if (checkoutMode === 'delivery' && !selectedProvince) {
           showPopup({ message: 'Vui lòng chọn tỉnh / thành phố.' });
           checkoutProvince?.focus();
           return;
         }
 
-        if (deliveryType === 'delivery' && !selectedDistrict) {
+        if (checkoutMode === 'delivery' && !selectedDistrict) {
           showPopup({ message: 'Vui lòng chọn quận / huyện.' });
           checkoutDistrict?.focus();
           return;
         }
 
-        if (deliveryType === 'delivery' && !selectedWard) {
+        if (checkoutMode === 'delivery' && !selectedWard) {
           showPopup({ message: 'Vui lòng chọn phường / xã.' });
           checkoutWard?.focus();
           return;

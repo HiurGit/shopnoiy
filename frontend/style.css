@@ -5212,7 +5212,7 @@ body.pd-lightbox-open {
 
 .checkout-tabs {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   background: #eef0f3;
   border: 1px solid #d9dee6;
   border-radius: 999px;
@@ -5221,12 +5221,14 @@ body.pd-lightbox-open {
 }
 
 .checkout-tab {
-  height: 36px;
+  min-height: 42px;
+  padding: 0 8px;
   border: none;
   background: transparent;
   color: #98a0ad;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 500;
+  line-height: 1.2;
 }
 
 .checkout-tab.active {
@@ -5234,6 +5236,7 @@ body.pd-lightbox-open {
   color: var(--accent);
 }
 
+.checkout-address-select-row[hidden],
 .checkout-pickup-row[hidden],
 .checkout-delivery-row[hidden] {
   display: none;
